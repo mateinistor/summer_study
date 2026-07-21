@@ -1,4 +1,4 @@
-
+## Folderele principale ale sistemului 
 /etc - Toate fisierele de configurare ale sistemului
 
 /var - Fisierele ale caror dimensiuni si continut se schimba constant in timp ce sistemul ruleaza
@@ -8,4 +8,8 @@
 	/var/spool - Cozi de asteptare(e-mailuri, sarcini trimise catre imprimata etc)
 
 /bin - Fisierele binare(executabile)
+
+
+
+
 

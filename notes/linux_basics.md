@@ -18,6 +18,7 @@
 		Alisi: 'alias ll='ls -lah''
 		Variabile de mediu: 'export PATH="$HOME/bin:$PATH"'
 	Aplicare modificari pe loc:
-	```bash
+```bash
 	source ~/.bashrc
-	```
+```
+	

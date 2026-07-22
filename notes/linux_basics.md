@@ -1,4 +1,4 @@
-## Folderele principale ale sistemului 
+a## Folderele principale ale sistemului 
 /etc - Toate fisierele de configurare ale sistemului
 
 /var - Fisierele ale caror dimensiuni si continut se schimba constant in timp ce sistemul ruleaza
@@ -17,8 +17,8 @@
 	Ce contine:
 		Alisi: 'alias ll='ls -lah''
 		Variabile de mediu: 'export PATH="$HOME/bin:$PATH"'
-	Aplicare modificari pe loc:
 ```bash
+	Aplicare modificari pe loc:
 	source ~/.bashrc
 ```
 	

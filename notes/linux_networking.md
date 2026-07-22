@@ -21,9 +21,11 @@ Acest scenariu se aplică atunci când o aplicație sau un test accesează un po
 
 ```bash
 sudo iptables -t nat -A OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-port 20280
+```
 
 ### Scenariul B: Redirecționarea traficului EXTERN (din internet)
 Acest scenariu se aplică atunci când vizitatorii din afara serverului accesează un port public, iar tu vrei să trimiți acel trafic către o aplicație internă. Aici interceptăm pachetele direct la intrarea în sistem, înainte de a fi procesate, folosind lanțul PREROUTING.
 
 ```bash
 sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 5000
+```

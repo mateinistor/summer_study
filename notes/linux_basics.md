@@ -1,24 +1,22 @@
 ## Folderele principale ale sistemului 
-/etc - Toate fisierele de configurare ale sistemului
 
-/var - Fisierele ale caror dimensiuni si continut se schimba constant in timp ce sistemul ruleaza
-	/var/log - Unde sistemul scrie toate jurnalele(Primul loc in care sa te uiti cand investighezi un eveniment
-	/var/www - Locul standard unde stau fisierele unui site web
-	/var/cache - Date temporare salvate de aplicatii pentru a se incarca mai repede data viitoare
-	/var/spool - Cozi de asteptare(e-mailuri, sarcini trimise catre imprimata etc)
+* `/etc` — Toate fișierele de configurare ale sistemului.
+* `/var` — Fișiere ale căror dimensiuni și conținut se schimbă constant (jurnale, cache).
+  * `/var/log` — Unde sistemul scrie toate jurnalele (primul loc în care te uiți când investighezi un eveniment).
+  * `/var/www` — Locul standard unde stau fișierele unui site web.
+  * `/var/cache` — Date temporare salvate de aplicații pentru încărcare rapidă.
+  * `/var/spool` — Cozi de așteptare (e-mailuri, sarcini de imprimantă etc.).
+* `/bin` — Fișierele binare (executabile).
 
-/bin - Fisierele binare(executabile)
 
+## Fișierul de Configurare '.bashrc'
 
-## Fisierul de Configurare '.bashrc'
+* **Locație:** `~/.bashrc` (fișier ascuns în `home`).
+* **Rol:** Se execută automat la deschiderea fiecărui terminal nou.
+* **Ce conține:**
+  * **Aliași:** `alias ll='ls -lah'`
+  * **Variabile de mediu:** `export PATH="$HOME/bin:$PATH"`
 
-	Locatie: '~/.bashrc' (fisier ascuns in 'home')
-	Rol: Se executa automat la deschiderea fiecarui terminal nou
-	Ce contine:
-		Alisi: 'alias ll='ls -lah''
-		Variabile de mediu: 'export PATH="$HOME/bin:$PATH"'
+**Aplicare modificări pe loc:**
 ```bash
-	Aplicare modificari pe loc:
-	source ~/.bashrc
-```
-	
+source ~/.bashrc

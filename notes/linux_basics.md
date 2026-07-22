@@ -1,4 +1,4 @@
-a## Folderele principale ale sistemului 
+## Folderele principale ale sistemului 
 /etc - Toate fisierele de configurare ale sistemului
 
 /var - Fisierele ale caror dimensiuni si continut se schimba constant in timp ce sistemul ruleaza

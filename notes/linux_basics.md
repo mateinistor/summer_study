@@ -10,6 +10,14 @@
 /bin - Fisierele binare(executabile)
 
 
+## Fisierul de Configurare '.bashrc'
 
-
-
+	Locatie: '~/.bashrc' (fisier ascuns in 'home')
+	Rol: Se executa automat la deschiderea fiecarui terminal nou
+	Ce contine:
+		Alisi: 'alias ll='ls -lah''
+		Variabile de mediu: 'export PATH="$HOME/bin:$PATH"'
+	Aplicare modificari pe loc:
+	```bash
+	source ~/.bashrc
+	```

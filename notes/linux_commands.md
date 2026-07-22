@@ -30,21 +30,68 @@
 	'cat <fisier>' - Afiseaza tot continutul fisierului in terminal
 	'head -n <X> <fisier>' - Afiseaza primele 'X' linii din fisier
 	'tail -n <X> <fisier>' - Afiseaza ultimele 'X' linii din fisier
+	'less <fisier>' - Deschide un fisier mare pentru citire pagina cu pagina('q' - iesire, '/' - cautare, 'g'/'G' - inceput/sfarsit
 	'grep "<text>" <fisier>' - Cauta un sir de caractere specific intr-un fisier
 	'wc <fisier>' - Numara liniile, cuvintele si octetii dintr-un fisier
 		'-l' - numara doar liniile
-
+	'sed 's/vechi/nou/g' <fisier>' - Inlocuieste un text cu altul in tot fisierul
+		'-i' : Salveaza modificarile direct in fisier
 ## 4. Reanalizare si Scurtaturi in Terminal
 
-	'which <comanda>' - Arata calea absoluta catre executabilul unei comenzi
 	'nano <fisier>' - Deschide editorul de text simplu in terminal
 		'Ctrl + O' + 'Enter' - Salveaza fisierul
 		'Ctrl + X' - Iesi din nano
 	'clear' sau 'Ctrl + L' - Curata ecranul terminalului
 
 ## 5. Legarea Comenzilor (Pipes si Redirectionari)
+
 	'comanda1 | comanda2' - Trimite iesirea primei comenzi ca intrare pentru a doua
 		*Exemplu*: 'cat /etc/passwd | wc -l' - contorizeaza numarul de utilizatori/randuri
 	'comanda > fisier' - Salveaza iesirea intr-un fisier (suprascrie continutul existent)
 	'comanda >> fisier' - Salveaza iesirea la finalul unui fisier (adauga fara sa stearga)
 
+## 6. Cautare Fisiere si Executabile
+
+        'which <comanda>' - Arata calea absoluta catre executabilul unei comenzi
+        'whereis <comanda>' - Cauta mai complex: arata calea executabilului, fisierele sursa si paginile de manual
+	'locate <nume_fisier>' - Cauta fisiere in tot sistemul folosind o baza de date indexata
+	'sudo updatedb' - Actualizeaza manual baza de date pentru 'locate'
+	'find <path> -name "<nume>" - Cauta fisiere/directoare in timp real pe disc dupa nume
+		'-iname' - Cauta fara sa tina cont de majuscule/minuscule
+		'type f' - Cauta doar fisiere
+
+## 7. Permisiuni Fisiere si Directoare
+
+	### Vizualizare si Intelegere Permisiuni
+
+		'ls -l' - Afiseaza permisiunile fisierelor
+		Structura: '[tip][proprietar][[grup][altii]'
+		'r' = 4 | 'w' = 2 | 'x' = 1
+	
+	### Schimbare Permisiuni
+
+		'chmod +x <fisier>' - Face fisierul executabil pentru toata lumea
+		'chmod -x <fisier>' - Scoate dreptul de executare
+		'chmod 755 <fisier>' - Permisiuni standard
+		'chmod 644 <fisier>' - Permisiuni standard pentru fisiere text
+		'chmod -R 755 <folder>' - Aplica permisiunile recursiv pentru tot folderul si continutul sau
+
+	### Schimbare Proprietar / Grup
+
+		'chown <user> <fisier> - Schimba proprietarul fisierului
+		'chown <user>:<grup> <fisier>' - Schimba si proprietarul si grupul
+		'sudo chown -R <user>:<grup> <folder> - Schimba proprietarul recursiv pe tot folderul
+
+## 8. Managment Procese si Sistem
+
+	### Identificare Procese
+
+		'ps aux' - Listeaza toate procesele active din sistem si ID-ul lor
+		'top' / 'htop' - Afiseaza toate procesele in tipm real
+		'pgrep <nume_proces>' - Cauta si afiseaza direct ID-ul unui proces dupa nume
+	
+	### Oprire Procese
+
+		'kill <PID>' - Trimite semnalul standard de oprire
+		'kill -9 <PID>' - Inchidere fortata. Se foloseste cand procesul s-a blocat si nu raspunde
+		'killall <nume_proces>' - Opreste toate procesele care au un anumit nume

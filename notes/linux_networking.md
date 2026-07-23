@@ -29,3 +29,43 @@ Acest scenariu se aplică atunci când vizitatorii din afara serverului acceseaz
 ```bash
 sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 5000
 ```
+
+
+
+## Depanare SSH și Inspectare Log-uri
+
+### Comenzi Rapide de Diagnosticare SSH
+* `ssh -v user@ip` — Modul verbose: arată pas cu pas unde se blochează conexiunea.
+* `sudo service ssh status` (sau `systemctl status ssh`) — Verifică dacă serverul SSH rulează.
+* `ss -tuln | grep 22` — Verifică dacă portul 22 este deschis și ascultă conexiuni.
+
+### Monitorizarea Log-urilor de Autentificare
+* `/var/log/auth.log` — Fișierul principal unde Linux înregistrează toate încercările de login.
+* `sudo tail -f /var/log/auth.log` — Monitorizează în timp real încercările de conectare SSH.
+* `sudo grep "Failed password" /var/log/auth.log` — Listează parolele greșite / atacurile.
+
+---
+
+### Erori Frecvente în Log-uri
+
+#### 1. Permisiuni greșite pe fișierele SSH (Permission denied)
+SSH refuză conexiunea dacă folderul sau cheile au permisiuni prea permisive.
+```bash
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/id_rsa
+chmod 644 ~/.ssh/authorized_keys
+```
+
+
+#### 2. Eroare la crearea sesiunii
+	Eroare: "Varlink call io.systemd.Login.CreateSession failed / Transport endpoint is not connected"
+
+Solutie rapida:
+```bash
+sudo systemctl restart systemd-logind
+# Dacă ești în WSL (Windows Subsystem for Linux), rulează în PowerShell:
+wsl --shutdown
+```
+
+
+

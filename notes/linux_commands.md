@@ -95,3 +95,36 @@
 		'kill <PID>' - Trimite semnalul standard de oprire
 		'kill -9 <PID>' - Inchidere fortata. Se foloseste cand procesul s-a blocat si nu raspunde
 		'killall <nume_proces>' - Opreste toate procesele care au un anumit nume
+
+
+## Utilitarul `awk` - Procesare și Filtrare de Text
+
+`awk` este folosit pentru a analiza, filtra și manipula fișiere structurate pe linii și coloane (ex: log-uri, fișiere CSV, output-uri de la alte comenzi).
+
+### 1. Structura de Bază
+Comanda funcționează pe principiul: **`awk 'tipar { acțiune }' fișier`**
+* **Tipar (Pattern):** O condiție sau filtru (ex: `NR==1`, `NF > 3`, `/eroare/`). Dacă lipsește, acțiunea se aplică pe *toate* liniile.
+* **Acțiune:** Ce să facă cu linia care se potrivește (ex: `{print $1}`). Dacă lipsește, acțiunea implicită este printarea liniei.
+
+---
+
+### 2. Variabile Interne Esențiale
+`awk` creează automat câteva variabile utile la fiecare linie citită:
+
+* **`$0`** : Întreaga linie curentă.
+* **`$1`, `$2`, `$3`...** : Coloana 1, coloana 2, coloana 3 etc.
+* **`NF` (Number of Fields)** : Numărul total de coloane din linia curentă.
+  * `$NF` înseamnă **ultima coloană** din linie.
+* **`NR` (Number of Records)** : Numărul total al liniei curente (însumat din toate fișierele).
+* **`FNR` (File Number of Records)** : Numărul liniei curente raportat doar la fișierul activ.
+
+---
+
+### 3. Exemple Practice Frecvente
+
+#### A. Extragerea anumitor coloane
+Afișează doar prima și a treia coloană dintr-un output (implicit, separatorul de coloane este spațiul):
+```bash
+ps aux | awk '{print $1, $3}'
+
+

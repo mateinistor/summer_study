@@ -126,5 +126,35 @@ Comanda funcționează pe principiul: **`awk 'tipar { acțiune }' fișier`**
 Afișează doar prima și a treia coloană dintr-un output (implicit, separatorul de coloane este spațiul):
 ```bash
 ps aux | awk '{print $1, $3}'
+```
+
+
+## Administrarea Serviciilor cu `systemctl` (`systemd`)
+
+`systemctl` este utilitarul principal pentru gestionarea serviciilor, proceselor de fundal și stării sistemului în distribuțiile Linux moderne.
+
+### 1. Comenzi pentru Controlul Serviciilor
+* `sudo systemctl status <nume_serviciu>` — Arată starea curentă (active/running, inactive, failed), PID-ul și ultimele linii de log.
+* `sudo systemctl start <nume_serviciu>` — Pornește serviciul imediat.
+* `sudo systemctl stop <nume_serviciu>` — Oprește serviciul imediat.
+* `sudo systemctl restart <nume_serviciu>` — Repornește serviciul (echivalent cu stop + start).
+* `sudo systemctl reload <nume_serviciu>` — Reîncarcă configurația fără a opri serviciul (util pentru Nginx/Apache).
+
+### 2. Gestionarea Autostart-ului la Boot
+* `sudo systemctl enable <nume_serviciu>` — Configurează serviciul să pornească automat la aprinderea serverului.
+* `sudo systemctl disable <nume_serviciu>` — Oprește pornirea automată la boot.
+* `sudo systemctl is-enabled <nume_serviciu>` — Verifică dacă este setat să pornească la boot.
+
+### 3. Diagnosticare și Troubleshooting
+* `systemctl list-units --type=service --state=failed` — Afișează toate serviciile care au crăpat (FAILED).
+* `systemctl list-units --type=service` — Afișează toate serviciile active în sistem.
+* `journalctl -u <nume_serviciu>` — Afișează log-urile specifice generate de un anumit serviciu.
+
+---
+> **Diferență utilă (WSL / Ubuntu vechi):**
+> În unele medii (cum ar fi Docker sau subsisteme WSL mai vechi fără `systemd` activat), comanda `systemctl` poate da eroare. În acele cazuri se folosește sintaxa clasică: `sudo service <nume> start/status`.
+
+
+
 
 

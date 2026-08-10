@@ -87,8 +87,13 @@ Principalele sale roluri sunt:
 Afișează detaliile (issuer, subject, data de expirare) ale unui certificat în format text lizibil:
 ```bash
 openssl x509 -in /cale/catre/certificat.crt -text -noout
+```
 
+#### 2. Generarea unui certificat automat(Self-Signed Certificate)
+Creează o cheie privată și un certificat public direct (fără a trece printr-o autoritate de certificare), util pentru medii de dezvoltare sau teste interne:
+```bash
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -keyout /etc/ssl/private/server.key \
   -out /etc/ssl/certs/server.crt \
   -subj "/CN=localhost/O=MyCompany/OU=IT/L=Iasi/ST=Iasi/C=RO"
+```

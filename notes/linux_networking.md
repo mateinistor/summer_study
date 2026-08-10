@@ -69,3 +69,26 @@ wsl --shutdown
 
 
 
+## SSL/TLS - Securizarea Comunicațiilor și Certificate Criptografice
+
+**SSL/TLS** (Secure Sockets Layer / Transport Layer Security) este protocolul criptografic ce asigură transmiterea securizată a datelor între două capete (client-server sau server-server). 
+
+Principalele sale roluri sunt:
+* **Criptarea datelor:** Impiedică interceptarea informațiilor pe drum (ex: date bancare, parole, jetoane de autentificare).
+* **Autentificarea:** Certificatele SSL atestă identitatea reală a serverului (folosit pentru HTTPS pe portul 443).
+
+---
+
+### Utilitarul `openssl` - Comenzi Esențiale
+
+`openssl` este instrumentul standard din Linux pentru administrarea cheilor și certificatelor SSL/TLS.
+
+#### 1. Inspectarea unui certificat existent
+Afișează detaliile (issuer, subject, data de expirare) ale unui certificat în format text lizibil:
+```bash
+openssl x509 -in /cale/catre/certificat.crt -text -noout
+
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/server.key \
+  -out /etc/ssl/certs/server.crt \
+  -subj "/CN=localhost/O=MyCompany/OU=IT/L=Iasi/ST=Iasi/C=RO"

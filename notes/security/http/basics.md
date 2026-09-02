@@ -22,7 +22,7 @@
 Un URL (*Uniform Resource Locator*) conține componentele necesare localizării și interogării unei resurse:
 
 ```text
-[https://user:password@exemplu.ro:443/cale/pagina?categorie=it&pret=100#detalii](https://user:password@exemplu.ro:443/cale/pagina?categorie=it&pret=100#detalii)
+[https://user:password@exemplu.ro:443/cale/pagina?categorie=it&pret=100#detalii]
 └─┬─┘   └─────┬─────┘ └────┬────┘ └─┬─┘ └─────┬────┘ └──────────┬───────┘ └───┬───┘
 Scheme    Userinfo       Host     Port      Path           Query         Fragment
 
@@ -51,7 +51,7 @@ GET /produse?categorie=gaming HTTP/1.1
 Host: magazin.ro
 User-Agent: Mozilla/5.0
 Accept: text/html
-
+```
 ### Formatul unui Raspuns (Response)
 
 ```HTTP/1.1 200 OK
@@ -62,4 +62,4 @@ Content-Length: 1024
 <html>
   <body>Exemplu pagina</body>
 </html>
-
+```

@@ -52,12 +52,4 @@ dirb [http://10.10.10.10/](http://10.10.10.10/)
 
 ---
 
-### Interpretarea Răspunsurilor HTTP
 
-| Cod Status | Semnificație | Relevanță în Securitate |
-| :--- | :--- | :--- |
-| **200 OK** | Succes | Resursa există și este accesibilă direct. |
-| **301 / 302** | Redirecționare | Directorul există și redirecționează către un alt traseu. |
-| **401 Unauthorized** | Autentificare cerută | Pagină sau panou protejat prin parolă (țintă de interes). |
-| **403 Forbidden** | Acces restricționat | Resursa există fizic pe server, dar accesul direct este blocat. |
-| **404 Not Found** | Inexistent | Traseul nu există (ignorat automat de utilitar). |

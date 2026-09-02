@@ -28,3 +28,34 @@ Aceste antete sunt returnate de către serverul web către client alături de co
 | **`Cache-Control`** | Dictează regulile de salvare în cache (ex: cât timp are voie browserul să păstreze resursa local înainte de a cere o copie nouă de pe server). |
 | **`Content-Type`** | Specifică tipul MIME al fișierului returnat (`text/html`, `application/json`, `image/png`). Browserul folosește acest antet pentru a ști cum să interpreteze și să randeze conținutul. |
 | **`Content-Encoding`** | Specifică algoritmul de compresie utilizat efectiv de server pentru a împacheta datele trimise pe rețea (ex: `gzip`). |
+
+
+---
+
+## 3. Cookie-uri & Gestionarea Stării (State Management)
+
+### Ce sunt Cookie-urile?
+Un **cookie** este o bucată mică de date salvată local pe computerul utilizatorului de către browserul web. 
+
+Deoarece **HTTP este un protocol stateless** (fără stare, serverul nu ține minte utilizatorul de la o cerere la alta), cookie-urile permit serverului să:
+* Păstreze sesiunea de autentificare activă (login persistent).
+* Salveze preferințe de navigare (limbă, temă de culoare).
+* Urmărească acțiunile utilizatorului (coș de cumpărături, tracking).
+
+---
+
+### Fluxul de comunicare Client-Server
+
+1. **Clientul cere pagina:** Browserul trimite o cerere inițială `GET`.
+2. **Serverul trimite datele de sesiune:** Răspunsul serverului conține antetul **`Set-Cookie: nume=valoare`**, instruind browserul să stocheze valoarea.
+3. **Browserul include cookie-ul automat:** La orice cerere viitoare către acel domeniu, browserul include automat datele în antetul **`Cookie: nume=valoare`**.
+4. **Serverul recunoaște clientul:** Serverul citește antetul `Cookie` și returnează conținut adaptat utilizatorului, fără a cere o nouă logare.
+
+```text
+Client (Browser)                                    Server Web
+       |                                                 |
+       | ----- 1. GET /login --------------------------> |
+       | <---- 2. 200 OK + Set-Cookie: user=adam ------- |  (Salvează cookie-ul local)
+       |                                                 |
+       | ----- 3. GET /dashboard (Cookie: user=adam) --> |  (Trimis automat la orice pagină)
+       | <---- 4. 200 OK (Pagina personalizată) -------- |

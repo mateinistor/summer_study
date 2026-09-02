@@ -26,7 +26,7 @@ Un URL (*Uniform Resource Locator*) conține componentele necesare localizării 
 └─┬─┘   └─────┬─────┘ └────┬────┘ └─┬─┘ └─────┬────┘ └──────────┬───────┘ └───┬───┘
 Scheme    Userinfo       Host     Port      Path           Query         Fragment
 
-
+```
 ## 4. Protocoale comune la Nivel Aplicație (Layer 7)
 
 | Protocol | Port standard | Destinație |

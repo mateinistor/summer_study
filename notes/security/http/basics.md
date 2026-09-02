@@ -47,19 +47,31 @@ Scheme    Userinfo       Host     Port      Path           Query         Fragmen
 ### Formatul unei Cereri (Request)
 
 ```http
-GET /produse?categorie=gaming HTTP/1.1
-Host: magazin.ro
-User-Agent: Mozilla/5.0
-Accept: text/html
+GET / HTTP/1.1
+
+Host: tryhackme.com
+User-Agent: Mozilla/5.0 Firefox/87.0
+Referer: https://tryhackme.com/
+
 ```
 ### Formatul unui Raspuns (Response)
+```http
+HTTP/1.1 200 OK
 
-```HTTP/1.1 200 OK
-Content-Type: text/html; charset=UTF-8
-Content-Length: 1024
+Server: nginx/1.15.8
+Date: Fri, 09 Apr 2021 13:34:03 GMT
+Content-Type: text/html
+Content-Length: 98
 
-<!DOCTYPE html>
+
 <html>
-  <body>Exemplu pagina</body>
+<head>
+    <title>TryHackMe</title>
+</head>
+<body>
+    Welcome To TryHackMe.com
+</body>
 </html>
+
+
 ```

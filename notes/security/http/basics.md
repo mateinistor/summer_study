@@ -75,3 +75,18 @@ Content-Length: 98
 
 
 ```
+
+## 6. Metode HTTP Comune (TryHackMe Summary)
+
+Metodele HTTP sunt modul prin care clientul indică acțiunea pe care intenționează să o execute atunci când trimite o cerere către server. Deși există mai multe metode, cel mai des utilizate în practică sunt `GET` și `POST`.
+
+---
+
+### Cele mai folosite metode
+
+| Metodă | Descriere | Cazuri de utilizare |
+| :--- | :--- | :--- |
+| **`GET`** | Preluarea și citirea de informații de pe un server web. | Încărcarea unei pagini, descărcarea unei imagini, căutări simple. |
+| **`POST`** | Trimiterea de date către server și, potențial, crearea de înregistrări noi. | Înregistrare/autentificare (login), adăugarea unui comentariu, formulare web. |
+| **`PUT`** | Trimiterea de date către un server web pentru a actualiza informații existente. | Modificarea setărilor de profil, actualizarea stocului unui produs. |
+| **`DELETE`** | Ștergerea de informații sau înregistrări de pe un server web. | Ștergerea unui cont, eliminarea unui articol sau comentariu. |

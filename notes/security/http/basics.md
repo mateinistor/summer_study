@@ -76,7 +76,7 @@ Content-Length: 98
 
 ```
 
-## 6. Metode HTTP Comune (TryHackMe Summary)
+## 6. Metode HTTP Comune 
 
 Metodele HTTP sunt modul prin care clientul indică acțiunea pe care intenționează să o execute atunci când trimite o cerere către server. Deși există mai multe metode, cel mai des utilizate în practică sunt `GET` și `POST`.
 

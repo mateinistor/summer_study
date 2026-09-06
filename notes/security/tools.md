@@ -247,3 +247,33 @@ Pentru a viza mai multe mașini simultan, se specifică intervale sau notația d
 | **Gazdă unică (Single Host)** | `nmap -sn 192.168.1.10` sau `/32` | **1 IP** |
 
 > **Calcul rapid adrese:** $\text{IP-uri totale} = 2^{(32 - \text{Prefix})}$. Cu cât numărul prefixului este mai mare, cu atât rețeaua este mai restrânsă.
+
+
+---
+
+
+---
+
+### Motorul de Scriptare Nmap / NSE (Nmap Scripting Engine)
+
+NSE extinde funcționalitatea de bază a Nmap dintr-un simplu scanner de porturi într-un instrument activ de audit, recunoaștere avansată și detectare de vulnerabilități. Scripturile sunt scrise în limbajul **Lua** și se găsesc local în `/usr/share/nmap/scripts/`.
+
+#### Sintaxă de Utilizare
+
+* `-sC` sau `--script=default` — Rulează setul standard de scripturi considerate utile, rapide și fără risc (*safe*).
+* `--script=<categorie>` — Rulează toate scripturile dintr-o anumită categorie (ex: `--script=vuln`).
+* `--script="<cat1> or <cat2>"` — Combină categorii logice (ex: `--script="safe or discovery"`).
+* `--script=<nume-script>` — Rulează un script specific (ex: `--script=http-title`).
+
+#### Categorii Principale de Scripturi
+
+| Categorie | Nivel de Risc | Descriere și Utilizare Practică |
+| :--- | :--- | :--- |
+| **`safe`** | Minim | Nu afectează stabilitatea țintei și nu consumă resurse majore (ex. extragere titlu pagină HTTP, certificat SSL). |
+| **`discovery`** | Redus / Mediu | Interoghează activ serviciile pentru a mapa resurse suplimentare din rețea (ex. enumerare utilizatori/rute prin SNMP). |
+| **`vuln`** | Mediu | Scanează serviciile detectate pentru a identifica vulnerabilități cunoscute (CVE-uri specifice). |
+| **`auth`** | Mediu | Încearcă ocolirea autentificării sau verificarea credențialelor anonime/implicite (ex. login anonim pe FTP). |
+| **`brute`** | Zgomotos | Execută atacuri de tip forță brută folosind dicționare pe formulare de autentificare (SSH, baze de date, FTP). |
+| **`intrusive`** | Ridicat | Poate bloca sau prăbuși serviciul investigat (*crash/DoS*); consumă bandă mare și declanșează alerte pe firewall/IDS. |
+| **`exploit`** | Maxim | Încearcă exploatarea activă a unei vulnerabilități pentru a livra un payload sau a obține acces neautorizat. |
+

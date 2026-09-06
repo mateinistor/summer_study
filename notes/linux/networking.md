@@ -98,7 +98,7 @@ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -subj "/CN=localhost/O=MyCompany/OU=IT/L=Iasi/ST=Iasi/C=RO"
 ```
 
-
+---
 
 ## 🌐 Remediere Rutare OpenVPN pe WSL 2 (TryHackMe)
 

@@ -100,7 +100,7 @@ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 
 
 
-### 🌐 Remediere Rutare OpenVPN pe WSL 2 (TryHackMe)
+## 🌐 Remediere Rutare OpenVPN pe WSL 2 (TryHackMe)
 
 La conectarea prin OpenVPN pe o instanță WSL 2, rutele trimise automat de serverul VPN pot eșua la asocierea cu interfața virtuală (`dev [NULL]`). Din această cauză, traficul destinat laboratorului nu este trimis prin tunel, generând `100% packet loss` la `ping` sau scanări fără răspuns.
 

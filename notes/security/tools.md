@@ -53,3 +53,13 @@ dirb [http://10.10.10.10/](http://10.10.10.10/)
 ---
 
 
+---
+
+## 2. Utilitarul nmap (Network Mapper & Port Scanner)
+
+`nmap` este unealta standard de scanare a rețelei și recunoaștere activă. Este folosit pentru a descoperi gazde active într-o rețea, a identifica porturile deschise (TCP/UDP), a detecta versiunile exacte ale serviciilor care rulează și sistemul de operare al țintei.
+
+### Sintaxă de Bază
+
+```bash
+nmap [OPȚIUNI] <IP_SAU_DOMENIU>

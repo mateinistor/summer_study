@@ -67,41 +67,63 @@ nmap [OPȚIUNI] <IP_SAU_DOMENIU>
 
 ### Opțiuni și Flag-uri Frecvente
 
-# Scanare fără Ping (presupune că mașina este activă; util când firewall-ul blochează ICMP)
-nmap -Pn <IP>
+* **Scanare fără Ping ( -Pn ):** Presupune că toate gazdele sunt active și sare peste etapa de verificare prin ping (esențial pentru mașini de laborator protejate de firewall):
 
-# Detectarea versiunilor exacte de servicii (ex. versiune Apache, FileZilla, OpenSSH)
-nmap -sV <IP>
+```bash
+nmap -Pn 10.10.10.10
+```
 
-# Rularea scripturilor implicite de enumerare și vulnerabilități comune (NSE)
-nmap -sC <IP>
+* **Detectarea versiunilor exacte de servicii ( -sV ):** Trimite interogări specifice către porturile deschise pentru a afla software-ul exact și versiunea:
 
-# Scanare pe porturi specifice
-nmap -p 21,80,443,3389 <IP>
+```bash
+nmap -sV 10.10.10.10
+```
 
-# Scanarea tuturor celor 65.535 de porturi (full scan)
-nmap -p- <IP>
+* **Rularea scripturilor implicite de enumerare ( -sC ):** Activează setul de bază de scripturi automate NSE (Nmap Scripting Engine) pentru a detecta vulnerabilități și configurări nesigure:
 
-# Scanare SYN Stealth (rapidă, discretă, nu finalizează 3-way handshake; cere drepturi de root)
-sudo nmap -sS <IP>
+```bash
+nmap -sC 10.10.10.10
+```
 
-# Scanare TCP Connect completă (utilizabilă fără drepturi de administrator)
-nmap -sT <IP>
+* **Specificarea porturilor sau scanare completă ( -p ):** Limitează scanarea la porturi selectate sau verifică toate cele 65.535 de porturi:
 
-# Scanare pentru porturi UDP
-sudo nmap -sU <IP>
+```bash
+nmap -p 21,80,443,3389 10.10.10.10
+```
 
-# Ajustarea vitezei de scanare (0-5, unde T4 este optim pentru conexiuni stabile de laborator)
-nmap -T4 <IP>
+```bash
+nmap -p- 10.10.10.10
+```
 
-# Mod verbos (afișează porturile deschise în timp real, pe măsură ce le găsește)
-nmap -v <IP>
+* **Scanare rapidă și discretă SYN Stealth ( -sS ):** Trimite pachete SYN fără a finaliza conexiunea 3-way handshake (necesită drepturi de administrator):
 
-# Rularea unui script specific NSE (ex. testare login anonim pe serverul FTP)
-nmap -p 21 --script=ftp-anon <IP>
+```bash
+sudo nmap -sS 10.10.10.10
+```
 
-# Salvarea rezultatelor în toate cele 3 formate de bază (normal, XML, grepable)
-nmap -oA scan_results <IP>
+* **Ajustarea vitezei și agresivității scanării ( -T4 ):** Optimizează timpii de așteptare pentru conexiuni stabile și laboratoare rapide:
 
-# Comandă combinată standard pentru enumerarea completă a unei ținte
-sudo nmap -Pn -sS -sV -sC -p- -T4 -v <IP>
+```bash
+nmap -T4 10.10.10.10
+```
+
+* **Mod verbos în timp real ( -v ):** Afișează porturile deschise direct în terminal pe măsură ce sunt descoperite, fără a aștepta finalul scanării:
+
+```bash
+nmap -v 10.10.10.10
+```
+
+* **Rularea unui script specific NSE ( --script ):** Execută un script anume de enumerare (ex. testarea accesului anonim pe FTP):
+
+```bash
+nmap -p 21 --script=ftp-anon 10.10.10.10
+```
+
+* **Salvarea rezultatelor în toate formatele ( -oA ):** Generează automat rapoarte în formatele standard, XML și grepable:
+
+```bash
+nmap -oA nmap_scan_results 10.10.10.10
+```
+
+
+

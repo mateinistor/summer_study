@@ -63,3 +63,45 @@ dirb [http://10.10.10.10/](http://10.10.10.10/)
 
 ```bash
 nmap [OPȚIUNI] <IP_SAU_DOMENIU>
+
+
+### Opțiuni și Flag-uri Frecvente
+
+# Scanare fără Ping (presupune că mașina este activă; util când firewall-ul blochează ICMP)
+nmap -Pn <IP>
+
+# Detectarea versiunilor exacte de servicii (ex. versiune Apache, FileZilla, OpenSSH)
+nmap -sV <IP>
+
+# Rularea scripturilor implicite de enumerare și vulnerabilități comune (NSE)
+nmap -sC <IP>
+
+# Scanare pe porturi specifice
+nmap -p 21,80,443,3389 <IP>
+
+# Scanarea tuturor celor 65.535 de porturi (full scan)
+nmap -p- <IP>
+
+# Scanare SYN Stealth (rapidă, discretă, nu finalizează 3-way handshake; cere drepturi de root)
+sudo nmap -sS <IP>
+
+# Scanare TCP Connect completă (utilizabilă fără drepturi de administrator)
+nmap -sT <IP>
+
+# Scanare pentru porturi UDP
+sudo nmap -sU <IP>
+
+# Ajustarea vitezei de scanare (0-5, unde T4 este optim pentru conexiuni stabile de laborator)
+nmap -T4 <IP>
+
+# Mod verbos (afișează porturile deschise în timp real, pe măsură ce le găsește)
+nmap -v <IP>
+
+# Rularea unui script specific NSE (ex. testare login anonim pe serverul FTP)
+nmap -p 21 --script=ftp-anon <IP>
+
+# Salvarea rezultatelor în toate cele 3 formate de bază (normal, XML, grepable)
+nmap -oA scan_results <IP>
+
+# Comandă combinată standard pentru enumerarea completă a unei ținte
+sudo nmap -Pn -sS -sV -sC -p- -T4 -v <IP>

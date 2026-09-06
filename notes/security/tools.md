@@ -64,6 +64,21 @@ dirb [http://10.10.10.10/](http://10.10.10.10/)
 ```bash
 nmap [OPȚIUNI] <IP_SAU_DOMENIU>
 ```
+---
+
+#### Principii de Funcționare și Categorii de Scanări
+
+La nivel de transport, Nmap folosește trei mecanisme distincte pentru a determina starea unui port:
+
+| Categorie Scanare | Flag-uri Nmap | Cum funcționează la nivel de pachete | Răspuns: Port DESCHIS | Răspuns: Port ÎNCHIS | Răspuns: Port FILTRAT |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **1. TCP Standard** (bazate pe `SYN`) | `-sT` (Connect)<br>`-sS` (SYN Stealth) | Inițiază conexiunea trimițând un pachet `SYN`: <br>• `-sT` parcurge complet handshake-ul în 3 pași (`SYN` $\rightarrow$ `SYN/ACK` $\rightarrow$ `ACK`). Nu cere root, dar apare în log-uri.<br>• `-sS` răspunde cu `RST` după primirea `SYN/ACK` (half-open). Rapid, discret, necesită `sudo`. | Primește **`SYN/ACK`** | Primește **`RST`** | **Niciun răspuns** (Drop) sau eroare ICMP |
+| **2. UDP Stateless** (fără sesiune) | `-sU` (UDP Scan) | Trimite de regulă pachete UDP goale sau payload-uri specifice pe porturile comune (ex. DNS pe 53). Protocolul nu are confirmări (`ACK`). | **Niciun răspuns** (marcat **`open\|filtered`**; devine cert cu `-sV`) | Primește **`ICMP Type 3`** (Port Unreachable) | Niciun răspuns sau eroare ICMP de tip administrativ |
+| **3. Evasion TCP** (RFC 793 Compliant) | `-sN` (Null)<br>`-sF` (FIN)<br>`-sX` (Xmas) | Trimite pachete anormale **fără flag-ul `SYN`** (Null = niciun flag, FIN = doar `FIN`, Xmas = `FIN`+`PSH`+`URG`) pentru a ocoli firewall-urile stateless: <br>• Dacă portul e închis $\rightarrow$ primește `RST`.<br>• Dacă e deschis $\rightarrow$ ținta ignoră pachetul. | **Niciun răspuns** (marcat **`open\|filtered`**) | Primește **`RST`** | Eroare ICMP (Unreachable) |
+
+> **Atenție la scanările de evaziune pe Windows:** Sistemele de operare Microsoft Windows și unele echipamente Cisco nu respectă standardul RFC 793 și răspund cu `RST` la orice pachet malformat, făcând ca toate porturile să pară incorect închise la scanările `-sN`, `-sF` și `-sX`.
+
+
 
 ### Opțiuni și Flag-uri Frecvente
 

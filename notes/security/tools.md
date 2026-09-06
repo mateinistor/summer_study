@@ -63,7 +63,7 @@ dirb [http://10.10.10.10/](http://10.10.10.10/)
 
 ```bash
 nmap [OPȚIUNI] <IP_SAU_DOMENIU>
-
+```
 
 ### Opțiuni și Flag-uri Frecvente
 

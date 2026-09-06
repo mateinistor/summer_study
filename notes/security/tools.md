@@ -222,22 +222,28 @@ Nu trimit niciodată pachete cu `SYN`. Trimit pachete TCP anormale pentru a trec
 
 ---
 
+---
+
 ### Descoperirea Gazdelor / Host Discovery (`-sn`)
 
-Înainte de a scana porturi pe o țintă, se verifică ce mașini sunt pornite în rețea (*host discovery* / *ping sweep*).
+Înainte de a scana porturile unei ținte, se verifică ce mașini sunt pornite în rețea (*host discovery* / *ping sweep*).
 
-* **Flag Nmap:** `-sn` (*No port scan* — ignoră complet porturile și doar verifică dacă IP-urile sunt active).
-* **Ce pachete trimite:**
-  * Cereri ICMP Echo (ping clasic).
-  * Probe TCP: `SYN` pe portul 443 și `ACK` pe portul 80.
-  * Cereri ARP directe (dacă ești în aceeași rețea locală LAN și rulezi cu `sudo`).
+* **Flag principal:** `-sn` (*No port scan* — oprește scanarea porturilor și raportează doar dacă IP-urile răspund).
+* **Mecanism intern de verificare:**
+  * **ICMP Echo Request:** Ping clasic de nivel rețea.
+  * **TCP SYN (Port 443):** Probă pe HTTPS; răspunsul cu `SYN/ACK` sau `RST` confirmă că gazda este activă.
+  * **TCP ACK (Port 80):** Probă pe HTTP; orice mașină activă va răspunde cu `RST` la un `ACK` neașteptat.
+  * **ARP Requests:** Folosit prioritar și automat pe rețeaua locală LAN (dacă ești pe același subnet și rulezi cu `sudo`). Este o metodă la nivel Layer 2, imposibil de blocat de firewall-ul sistemului de operare.
 
-##### Definirea Rețelelor (Sintaxa CIDR)
-Pentru a scana mai multe mașini simultan, se folosește standardul CIDR (`IP/Prefix`), unde prefixul blochează biții de rețea:
+#### Sintaxa de Scanare și Notația CIDR
 
-$$\text{IP-uri totale în rețea} = 2^{(32 - \text{Prefix})}$$
+Pentru a viza mai multe mașini simultan, se specifică intervale sau notația de subnet CIDR (`IP/Prefix`), unde prefixul blochează biții de rețea ($32 - \text{Prefix}$ biți liberi pentru gazde):
 
-* `nmap -sn 192.168.1.0/24` $\rightarrow$ verifică toate cele 256 de adrese din subnet (`.1` la `.254` utile).
-* `nmap -sn 10.0.0.0/16` $\rightarrow$ verifică o clasă întreagă (65.536 de adrese).
-* `nmap -sn 192.168.1.1-50` $\rightarrow$ sintaxă alternativă cu interval explicit prin cratimă.
+| Tip Țintă | Exemplu Comandă | Număr Adrese Scanate |
+| :--- | :--- | :--- |
+| **Subnet `/24` (Cea mai folosită)** | `nmap -sn 192.168.1.0/24` | **256 IP-uri** (`.1` la `.254` utile pentru calculatoare) |
+| **Rețea extinsă `/16`** | `nmap -sn 10.0.0.0/16` | **65.536 IP-uri** (pentru corporații sau infrastructuri mari) |
+| **Interval cu cratimă** | `nmap -sn 192.168.1.1-50` | **50 IP-uri** (de la `.1` până la `.50` consecutiv) |
+| **Gazdă unică (Single Host)** | `nmap -sn 192.168.1.10` sau `/32` | **1 IP** |
 
+> **Calcul rapid adrese:** $\text{IP-uri totale} = 2^{(32 - \text{Prefix})}$. Cu cât numărul prefixului este mai mare, cu atât rețeaua este mai restrânsă.

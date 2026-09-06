@@ -174,26 +174,47 @@ sudo nmap -sU 10.10.10.10
 
 ### Interpretarea Stării Porturilor în Funcție de Scanare
 
-#### 1. Scanările Standard TCP (`-sT` și `-sS`)
-Aceste scanări inițiază conexiunea trimițând un pachet de tip `SYN` (Synchronize) și interpretează răspunsul conform mecanismului standard de 3-way handshake:
+---
 
-| Răspuns primit de la țintă | Stare raportată de Nmap | Explicație tehnică |
+#### 1. Scanările Standard TCP (`-sT` și `-sS`)
+
+Inițiază conexiunea trimițând un pachet `SYN` (Synchronize) și interpretează răspunsul conform mecanismului clasic de 3-way handshake:
+
+| Răspuns primit de la țintă | Stare raportată | Explicație tehnică |
 | :--- | :--- | :--- |
-| **`SYN/ACK`** | **`open`** | Serviciul este activ și a acceptat sincronizarea. La `-sT` se trimite `ACK` pentru a termina handshake-ul; la `-sS` se trimite direct `RST` pentru a tăia conexiunea. |
-| **`RST`** (Reset) | **`closed`** | Portul este închis; sistemul de operare țintă refuză conexiunea conform standardului TCP. |
-| **Niciun răspuns** (Drop) / Eroare ICMP | **`filtered`** | Pachetele au fost blocate sau aruncate de un firewall înainte de a ajunge la serviciu. |
+| **`SYN/ACK`** | `open` | Serviciul este activ și a acceptat sincronizarea. La `-sT` se trimite `ACK` pentru a finaliza conexiunea; la `-sS` se trimite direct `RST` pentru a tăia conexiunea înainte de logare. |
+| **`RST`** (Reset) | `closed` | Portul este închis; sistemul de operare țintă refuză conexiunea conform standardului TCP. |
+| **Niciun răspuns** (Drop) / Eroare ICMP | `filtered` | Pachetele au fost blocate sau aruncate de un firewall înainte de a ajunge la serviciu. |
 
 ---
 
-#### 2. Scanările Speciale (UDP și Evasion TCP)
-Aici logica se schimbă radical, deoarece nu se mai folosește secvența clasică de inițiere cu `SYN`:
+#### 2. Scanarea fără Conexiune (`-sU` UDP)
 
-* **Scanare UDP (`-sU`):** 
-  * UDP este fără conexiune (fără flag-uri `SYN`/`ACK`).
-  * Dacă portul e închis, ținta trimite de regulă un pachet **ICMP Type 3 (Port Unreachable)**.
-  * Dacă portul e deschis, serviciul de obicei **nu răspunde deloc**, motiv pentru care Nmap raportează starea incertă **`open|filtered`**.
+UDP este un protocol stateless (fără handshake, fără confirmări `ACK`). Nmap trimite pachete UDP brute (de regulă goale, sau payload-uri specifice pentru porturi comune precum DNS 53):
 
-* **Scanările de Evadare (`-sN` Null, `-sF` FIN, `-sX` Xmas):**
-  * Nu trimit niciodată `SYN`, ci flag-uri anormale pentru a păcăli firewall-urile stateless.
-  * **Regulă inversată conform RFC:** dacă portul este **deschis**, ținta **ignoră pachetul** (niciun răspuns $\rightarrow$ `open|filtered`); dacă este **închis**, ținta răspunde cu un pachet **`RST`** (`closed`).
+| Răspuns primit de la țintă | Stare raportată | Explicație tehnică |
+| :--- | :--- | :--- |
+| **Niciun răspuns** | `open|filtered` | Serviciul este deschis și ignoră pachetul gol, **sau** un firewall a dat drop pachetului. Necesită `-sV` pentru clarificare prin payload-uri de aplicație. |
+| **Răspuns UDP** (Rar) | `open` | Serviciul a recunoscut datele și a trimis un răspuns valid de nivel aplicație. |
+| **`ICMP Type 3`** (*Port Unreachable*) | `closed` | Sistemul țintă confirmă prin ICMP că nu ascultă niciun serviciu pe acel port. |
+| **Eroare ICMP administrativă** | `filtered` | Firewall-ul a respins explicit pachetul (ex. ICMP Type 3 Codes 1, 2, 9, 10 sau 13). |
 
+---
+
+#### 3. Scanările de Evaziune Firewall (`-sN`, `-sF`, `-sX`)
+
+Nu trimit niciodată pachete cu `SYN`. Trimit pachete TCP anormale pentru a trece neobservate de firewall-urile stateless (care filtrează doar tentativele de inițiere cu `SYN`):
+
+* **`-sN` (Null Scan):** Pachet TCP fără niciun flag setat (toți biții sunt 0).
+* **`-sF` (FIN Scan):** Pachet trimis doar cu flag-ul `FIN` aprins.
+* **`-sX` (Xmas Scan):** Pachet malformat cu flag-urile `FIN`, `PSH` și `URG` aprinse simultan (arată ca un pom de Crăciun în Wireshark).
+
+**Regula RFC 793:**
+
+| Răspuns primit de la țintă | Stare raportată | Explicație tehnică |
+| :--- | :--- | :--- |
+| **Niciun răspuns** | `open|filtered` | Conform standardului, un port deschis este obligat să ignore orice pachet nesincronizat primit fără `SYN`/`ACK`. |
+| **`RST`** (Reset) | `closed` | Conform standardului, dacă portul este închis, sistemul țintă trebuie să trimită `RST`. |
+| **`ICMP Type 3`** (*Unreachable*) | `filtered` | Pachetul a fost blocat de o regulă de firewall pe traseu. |
+
+> **Particularitate Microsoft Windows:** Sistemele Windows și unele echipamente Cisco nu respectă standardul RFC 793; ele răspund cu `RST` la orice pachet malformat, indiferent dacă portul este deschis sau nu. Astfel, scanările `-sN`, `-sF` și `-sX` vor raporta eronat că **toate porturile sunt închise** pe mașinile Windows.

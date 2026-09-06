@@ -218,3 +218,26 @@ Nu trimit niciodată pachete cu `SYN`. Trimit pachete TCP anormale pentru a trec
 | **`ICMP Type 3`** (*Unreachable*) | `filtered` | Pachetul a fost blocat de o regulă de firewall pe traseu. |
 
 > **Particularitate Microsoft Windows:** Sistemele Windows și unele echipamente Cisco nu respectă standardul RFC 793; ele răspund cu `RST` la orice pachet malformat, indiferent dacă portul este deschis sau nu. Astfel, scanările `-sN`, `-sF` și `-sX` vor raporta eronat că **toate porturile sunt închise** pe mașinile Windows.
+
+
+---
+
+### Descoperirea Gazdelor / Host Discovery (`-sn`)
+
+Înainte de a scana porturi pe o țintă, se verifică ce mașini sunt pornite în rețea (*host discovery* / *ping sweep*).
+
+* **Flag Nmap:** `-sn` (*No port scan* — ignoră complet porturile și doar verifică dacă IP-urile sunt active).
+* **Ce pachete trimite:**
+  * Cereri ICMP Echo (ping clasic).
+  * Probe TCP: `SYN` pe portul 443 și `ACK` pe portul 80.
+  * Cereri ARP directe (dacă ești în aceeași rețea locală LAN și rulezi cu `sudo`).
+
+##### Definirea Rețelelor (Sintaxa CIDR)
+Pentru a scana mai multe mașini simultan, se folosește standardul CIDR (`IP/Prefix`), unde prefixul blochează biții de rețea:
+
+$$\text{IP-uri totale în rețea} = 2^{(32 - \text{Prefix})}$$
+
+* `nmap -sn 192.168.1.0/24` $\rightarrow$ verifică toate cele 256 de adrese din subnet (`.1` la `.254` utile).
+* `nmap -sn 10.0.0.0/16` $\rightarrow$ verifică o clasă întreagă (65.536 de adrese).
+* `nmap -sn 192.168.1.1-50` $\rightarrow$ sintaxă alternativă cu interval explicit prin cratimă.
+

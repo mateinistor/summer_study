@@ -126,4 +126,32 @@ nmap -oA nmap_scan_results 10.10.10.10
 ```
 
 
+### Comportament Implicit (Default Behavior)
 
+Dacă se rulează comanda simplă fără flag-uri explicite (`nmap <IP>`):
+
+* **Fără privilegii (`nmap <IP>`):** Folosește automat **TCP Connect (`-sT`)**, deoarece un utilizator obișnuit nu are permisiuni pentru socket-uri brute (raw sockets) și este forțat să folosească apelul de sistem `connect()`.
+* **Cu privilegii (`sudo nmap <IP>`):** Folosește automat **SYN Stealth (`-sS`)**, fabricând manual pachete TCP pe care le întrerupe înainte de stabilirea completă a conexiunii.
+* **Porturi scanate:** În mod implicit verifică doar **top 1.000 cele mai comune porturi**, nu toate cele 65.535.
+
+---
+
+### Tipuri de Scanare TCP / UDP
+
+* **TCP Connect Scan ( -sT ):** Finalizează handshake-ul complet în 3 pași (`SYN` -> `SYN/ACK` -> `ACK`). Este zgomotoasă și lasă urme clare în log-urile aplicațiilor de pe țintă:
+
+```bash
+nmap -sT 10.10.10.10
+```
+
+* **SYN Half-Open / Stealth Scan ( -sS ):** Trimite `SYN`, primește `SYN/ACK`, dar răspunde cu `RST` (reset) pentru a rupe conexiunea înainte de a fi logată de aplicație. Rapidă și discretă:
+
+```bash
+sudo nmap -sS 10.10.10.10
+```
+
+* **UDP Scan ( -sU ):** Scanează servicii fără conexiune (ex. DNS 53, SNMP 161, DHCP 67/68). Mult mai lentă deoarece serviciile UDP nu returnează întotdeauna răspunsuri:
+
+```bash
+sudo nmap -sU 10.10.10.10
+```

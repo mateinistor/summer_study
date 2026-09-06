@@ -155,3 +155,30 @@ sudo nmap -sS 10.10.10.10
 ```bash
 sudo nmap -sU 10.10.10.10
 ```
+
+
+### Interpretarea Stării Porturilor în Funcție de Scanare
+
+#### 1. Scanările Standard TCP (`-sT` și `-sS`)
+Aceste scanări inițiază conexiunea trimițând un pachet de tip `SYN` (Synchronize) și interpretează răspunsul conform mecanismului standard de 3-way handshake:
+
+| Răspuns primit de la țintă | Stare raportată de Nmap | Explicație tehnică |
+| :--- | :--- | :--- |
+| **`SYN/ACK`** | **`open`** | Serviciul este activ și a acceptat sincronizarea. La `-sT` se trimite `ACK` pentru a termina handshake-ul; la `-sS` se trimite direct `RST` pentru a tăia conexiunea. |
+| **`RST`** (Reset) | **`closed`** | Portul este închis; sistemul de operare țintă refuză conexiunea conform standardului TCP. |
+| **Niciun răspuns** (Drop) / Eroare ICMP | **`filtered`** | Pachetele au fost blocate sau aruncate de un firewall înainte de a ajunge la serviciu. |
+
+---
+
+#### 2. Scanările Speciale (UDP și Evasion TCP)
+Aici logica se schimbă radical, deoarece nu se mai folosește secvența clasică de inițiere cu `SYN`:
+
+* **Scanare UDP (`-sU`):** 
+  * UDP este fără conexiune (fără flag-uri `SYN`/`ACK`).
+  * Dacă portul e închis, ținta trimite de regulă un pachet **ICMP Type 3 (Port Unreachable)**.
+  * Dacă portul e deschis, serviciul de obicei **nu răspunde deloc**, motiv pentru care Nmap raportează starea incertă **`open|filtered`**.
+
+* **Scanările de Evadare (`-sN` Null, `-sF` FIN, `-sX` Xmas):**
+  * Nu trimit niciodată `SYN`, ci flag-uri anormale pentru a păcăli firewall-urile stateless.
+  * **Regulă inversată conform RFC:** dacă portul este **deschis**, ținta **ignoră pachetul** (niciun răspuns $\rightarrow$ `open|filtered`); dacă este **închis**, ținta răspunde cu un pachet **`RST`** (`closed`).
+

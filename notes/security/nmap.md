@@ -65,11 +65,12 @@ sudo nmap -sS 10.10.10.10
 nmap -T4 10.10.10.10
 ```
 
-* **Mod verbos în timp real ( -v ):** Afișează porturile deschise direct în terminal pe măsură ce sunt descoperite, fără a aștepta finalul scanării:
-
-```bash
-nmap -v 10.10.10.10
-```
+* **Nivel de detaliere crescut (`-v` / `-vv`):**
+  * Activează modul *verbose* / *very verbose*. 
+  * Afișează porturile deschise instant în consolă imediat ce sunt identificate (fără a aștepta finalizarea scanării) și raportează timpul estimat până la finalizare (ETA).
+  ```bash
+  nmap -vv <IP>
+  ```
 
 * **Rularea unui script specific NSE ( --script ):** Execută un script anume de enumerare (ex. testarea accesului anonim pe FTP):
 

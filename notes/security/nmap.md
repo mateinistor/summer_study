@@ -281,3 +281,43 @@ Pe sistemele Linux, scripturile NSE sunt stocate local în directorul `/usr/shar
   sudo nmap --script-updatedb
   ```
 
+---
+
+
+### Firewall Evasion & IDS Bypassing
+
+Dispozitivele de filtrare a traficului (Firewalls, IDS/IPS) pot bloca sau detecta scanările Nmap standard. Următoarele opțiuni permit ocolirea sau identificarea acestora.
+
+* **Scanare fără ping (`-Pn`):**
+  * Ignoră faza de *Host Discovery* (ping ICMP) și presupune că ținta este activă.
+  * **Caz de utilizare:** Esențial împotriva sistemelor Windows sau serverelor care filtrează cererile ICMP prin firewall implicit (evită marcarea țintei ca fiind *dead/offline*).
+  ```bash
+  nmap -Pn <IP>
+  ```
+
+* **Fragmentarea pachetelor (`-f`):**
+  * Împarte anteturile și datele TCP în mici fragmente de 8 octeți (după antetul IP).
+  * **Caz de utilizare:** Împiedică firewall-urile vechi sau IDS-urile bazate pe semnături simple să analizeze pachetul complet dintr-o singură privire.
+  ```bash
+  nmap -f <IP>
+  ```
+
+* **Setarea manuală a MTU (`--mtu`):**
+  * Alternativă la `-f` pentru a specifica o dimensiune fixă pentru Maximum Transmission Unit.
+  * **Regulă:** Valoarea trebuie să fie obligatoriu un multiplu de 8.
+  ```bash
+  nmap --mtu 16 <IP>
+  ```
+
+* **Întârzierea pachetelor (`--scan-delay`):**
+  * Introduce o pauză între pachetele trimise pentru a preveni declanșarea regulilor de *rate-limiting* sau detecția anomaliilor de volum în rețele instabile.
+  ```bash
+  nmap --scan-delay 200ms <IP>
+  ```
+
+* **Detectarea firewall-ului prin Checksum invalid (`--badsum`):**
+  * Trimite deliberat pachete cu checksum TCP/UDP/IP eronat.
+  * O stivă reală a unui OS ignoră complet pachetul (*drop*). Dacă primești un răspuns (ex: `RST`), cel mai probabil răspunsul vine de la un firewall sau IDS inline neatent la validitatea checksum-ului.
+  ```bash
+  nmap --badsum <IP>
+  ```

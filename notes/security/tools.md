@@ -288,23 +288,21 @@ Scripturile pot fi rulate individual, grupate prin virgulă sau configurate cu p
   nmap --script=<nume-script> <IP>
   # Exemplu:
   nmap --script=http-fileupload-exploiter 10.10.10.5
-```
+  ```
 
 * **Rularea mai multor scripturi simultan:** Se specifică separate prin virgulă (fără spații între ele):
   ```bash
   nmap --script=smb-enum-users,smb-enum-shares <IP>
-```
+  ```
 
 * **Transmiterea argumentelor (`--script-args`):** Unele scripturi necesită date suplimentare (căi pe server, fișiere locale, credențiale). Sintaxa este `<nume-script>.<parametru>=valoare`:
   ```bash
   nmap -p 80 --script http-put --script-args http-put.url='/dav/shell.php',http-put.file='./shell.php' <IP>
-```
+  ```
 
 * **Manual integrat / Documentație (`--script-help`):** Afișează din terminal descrierea completă a scriptului, categoria din care face parte și argumentele acceptate:
   ```bash
   nmap --script-help <nume-script>
   # Exemplu:
   nmap --script-help http-put
-```
-
-
+  ```

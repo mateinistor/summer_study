@@ -324,3 +324,19 @@ Dispozitivele de filtrare a traficului (Firewalls, IDS/IPS) pot bloca sau detect
   ```bash
   nmap --badsum <IP>
   ```
+
+* **Limitarea retransmisiilor ( `--max-retries` ):**
+  * Limitează de câte ori retrimite Nmap un pachet de probă către un port care nu răspunde.
+  * **Caz de utilizare:** Crește considerabil viteza scanării pe mașini protejate de firewall-uri care dau *drop* la pachete și reduce volumul de trafic suspect în rețea.
+
+```bash
+nmap --max-retries 1 <IP>
+```
+
+* **Abandonarea automată a gazdelor lente ( `--host-timeout` ):**
+  * Specifică timpul maxim alocat scanării unui singur IP înainte de a renunța la el.
+  * **Caz de utilizare:** Previne blocarea procesului de scanare pe ținte extrem de lente, protejate de filtre stricte sau cu pierderi masive de pachete.
+
+```bash
+nmap --host-timeout 15m <IP>
+```

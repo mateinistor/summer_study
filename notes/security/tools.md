@@ -277,3 +277,14 @@ NSE extinde funcționalitatea de bază a Nmap dintr-un simplu scanner de porturi
 | **`intrusive`** | Ridicat | Poate bloca sau prăbuși serviciul investigat (*crash/DoS*); consumă bandă mare și declanșează alerte pe firewall/IDS. |
 | **`exploit`** | Maxim | Încearcă exploatarea activă a unei vulnerabilități pentru a livra un payload sau a obține acces neautorizat. |
 
+---
+
+#### Utilizarea Practică a Scripturilor NSE
+
+Scripturile pot fi rulate individual, grupate prin virgulă sau configurate cu parametri suplimentari în funcție de cerințele serviciului testat.
+
+* **Rularea unui singur script:**
+  ```bash
+  nmap --script=<nume-script> <IP>
+  # Exemplu:
+  nmap --script=http-fileupload-exploiter 10.10.10.5

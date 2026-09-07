@@ -21,69 +21,89 @@ La nivel de transport, Nmap folosește trei mecanisme distincte pentru a determi
 
 > **Atenție la scanările de evaziune pe Windows:** Sistemele de operare Microsoft Windows și unele echipamente Cisco nu respectă standardul RFC 793 și răspund cu `RST` la orice pachet malformat, făcând ca toate porturile să pară incorect închise la scanările `-sN`, `-sF` și `-sX`.
 
+---
 
+### Ghid Rapid de Flag-uri și Opțiuni Nmap
 
-### Opțiuni și Flag-uri Frecvente
+---
 
-* **Scanare fără Ping ( -Pn ):** Presupune că toate gazdele sunt active și sare peste etapa de verificare prin ping (esențial pentru mașini de laborator protejate de firewall):
+#### 1. Tipuri de Scanare de Bază (Probe Types)
+* `-sS` — **TCP SYN Scan (Stealth):** Trimite SYN, primește SYN/ACK, trimite RST. Rapid, discret la nivel de aplicație; necesită `sudo`. (Default cu root).
+* `-sT` — **TCP Connect Scan:** Finalizează complet handshake-ul în 3 pași prin apel de sistem. Zgomotos în log-uri; nu necesită root. (Default fără root).
+* `-sU` — **UDP Scan:** Scanează porturi UDP (fără conexiune/stateless). Lent din cauza rate-limiting-ului ICMP.
+* `-sN` — **TCP Null Scan:** Nu setează niciun flag (toate pe 0).
+* `-sF` — **TCP FIN Scan:** Setează doar flag-ul FIN.
+* `-sX` — **TCP Xmas Scan:** Setează flag-urile FIN, PSH și URG („aprins ca un pom de Crăciun”).
 
-```bash
-nmap -Pn 10.10.10.10
-```
+---
 
-* **Detectarea versiunilor exacte de servicii ( -sV ):** Trimite interogări specifice către porturile deschise pentru a afla software-ul exact și versiunea:
+#### 2. Scanarea Țintei și Selecția Porturilor (Target & Port Selection)
+* `-p <porturi>` — Specifică porturile de scanat:
+  * `-p 22,80,443` — Doar porturile enumerate.
+  * `-p 1-1000` — Interval de porturi (de la 1 la 1000).
+  * `-p-` — Toate cele 65.535 de porturi posibile.
+  * `-p U:53,T:22` — Separat pe protocoale (UDP 53, TCP 22).
+* `--top-ports <număr>` — Scanează top $N$ cele mai frecvente porturi din baza de date Nmap (ex: `--top-ports 100`).
+* `-F` — **Fast mode:** Scanează primele 100 cele mai utilizate porturi (echivalent cu `--top-ports 100`).
+* `-r` — Scanează porturile secvențial (de la cel mai mic la cel mai mare), fără a le alege aleatoriu.
 
-```bash
-nmap -sV 10.10.10.10
-```
+---
 
-* **Rularea scripturilor implicite de enumerare ( -sC ):** Activează setul de bază de scripturi automate NSE (Nmap Scripting Engine) pentru a detecta vulnerabilități și configurări nesigure:
+#### 3. Host Discovery (Descoperirea Gazdelor)
+* `-Pn` — **No Ping:** Sare peste verificarea ICMP; tratează toate țintele ca fiind pornite (esențial când firewall-ul blochează ping-ul).
+* `-sn` — **Ping Scan (No Port Scan):** Determină doar dacă mașina este activă (Host Discovery), fără a scana porturile.
+* `-PR` — **ARP Ping:** Folosește cadre ARP pentru host discovery (comportament implicit dacă ești în aceeași rețea locală).
 
-```bash
-nmap -sC 10.10.10.10
-```
+---
 
-* **Specificarea porturilor sau scanare completă ( -p ):** Limitează scanarea la porturi selectate sau verifică toate cele 65.535 de porturi:
+#### 4. Detecție de Servicii și Sistem de Operare
+* `-sV` — **Service Version Detection:** Interoghează porturile deschise pentru a determina versiunea exactă a serviciului / aplicației care rulează.
+  * `--version-intensity <0-9>` — Nivelul de adâncime al probelor de versiune (implicit 7; 9 este cel mai agresiv).
+* `-O` — **OS Detection:** Analizează răspunsurile stivei TCP/IP pentru a identifica sistemul de operare.
+* `-A` — **Aggressive Scan:** Activează simultan detecția OS (`-O`), versiunea serviciilor (`-sV`), scripturile de bază (`-sC`) și traceroute (`--traceroute`).
 
-```bash
-nmap -p 21,80,443,3389 10.10.10.10
-```
+---
 
-```bash
-nmap -p- 10.10.10.10
-```
+#### 5. Scripturi Nmap (NSE - Nmap Scripting Engine)
+* `-sC` — Rulează scripturile implicite (echivalent cu `--script=default`).
+* `--script=<nume|categorie>` — Rulează un script specific sau o întreagă categorie (ex: `--script=vuln`, `--script=safe`, `--script=ftp-anon`).
+* `--script-args=<k=v>` — Trimite argumente specifice către scriptul NSE rulat.
+* `--script-updatedb` — Reconstruiește catalogul `/usr/share/nmap/scripts/script.db` după adăugarea unor fișiere `.nse` noi.
 
-* **Scanare rapidă și discretă SYN Stealth ( -sS ):** Trimite pachete SYN fără a finaliza conexiunea 3-way handshake (necesită drepturi de administrator):
+---
 
-```bash
-sudo nmap -sS 10.10.10.10
-```
+#### 6. Evaziune Firewall & IDS (Firewall Evasion)
+* `-f` — Fragmentează pachetele IP în bucăți mici de 8 octeți pentru a îngreuna analiza inspectoarelor de pachete.
+* `--mtu <număr>` — Controlează manual dimensiunea MTU a fragmentelor (trebuie să fie un multiplu de 8).
+* `-D <decoy1,decoy2,ME>` — **Decoy scan:** Trimite pachete mascate cu adrese IP false intercalate cu IP-ul tău real pentru a îngropa sursa scanării în log-uri.
+* `-S <IP>` — **Spoof Source Address:** Falsifică adresa IP de origine din pachete.
+* `--badsum` — Trimite pachete cu checksum TCP/UDP/IP invalid deliberat (util pentru demascarea firewall-urilor sau proxy-urilor inline).
+* `--scan-delay <timp>ms` — Adaugă o pauză între cereri (evită blocarea pe bază de rate-limiting).
 
-* **Ajustarea vitezei și agresivității scanării ( -T4 ):** Optimizează timpii de așteptare pentru conexiuni stabile și laboratoare rapide:
+---
 
-```bash
-nmap -T4 10.10.10.10
-```
+#### 7. Ajustarea Vitezei și a Resurselor (Timing & Performance)
+* `-T<0-5>` — Profile de viteză și agresivitate pentru timing:
+  * `-T0` (Paranoid) / `-T1` (Sneaky) — Scanări extrem de lente, folosite pentru evaziune IDS.
+  * `-T2` (Polite) — Încetinește traficul pentru a consuma mai puțină lățime de bandă.
+  * `-T3` (Normal) — Profilul implicit.
+  * `-T4` (Aggressive) — Scanare rapidă, potrivită pentru rețele stabile/CTF.
+  * `-T5` (Insane) — Foarte rapid, dar poate rata porturi pe rețele instabile.
+* `--min-rate <număr>` — Forțează Nmap să nu trimită mai puțin de un număr specificat de pachete pe secundă (ex: `--min-rate 1000`).
 
-* **Nivel de detaliere crescut (`-v` / `-vv`):**
-  * Activează modul *verbose* / *very verbose*. 
-  * Afișează porturile deschise instant în consolă imediat ce sunt identificate (fără a aștepta finalizarea scanării) și raportează timpul estimat până la finalizare (ETA).
-  ```bash
-  nmap -vv <IP>
-  ```
+---
 
-* **Rularea unui script specific NSE ( --script ):** Execută un script anume de enumerare (ex. testarea accesului anonim pe FTP):
+#### 8. Filtrarea și Formatarea Rezultatelor (Output & Filtering)
+* `-v` / `-vv` — **Verbosity:** Nivel de detaliere crescut; afișează porturile deschise în consolă pe măsură ce sunt găsite și arată timpul estimat (ETA).
+* `--open` — Afișează exclusiv porturile care sunt garantat **deschise** (ignoră stările `closed` și `filtered`).
+* `--reason` — Afișează motivul tehnic exact pentru care un port se află într-o stare anume (ex: `syn-ack`, `conn-refused`, `no-response`).
+* `--packet-trace` — Afișează fiecare pachet trimis și primit de Nmap la nivel de cablu (util pentru debugging de rețea).
+* `-oN <fișier>` — Salvează rezultatul în format standard text (Normal output).
+* `-oG <fișier>` — Salvează rezultatul în format **Grepable** (ușor de parsat cu `grep`, `awk`, `cut`).
+* `-oX <fișier>` — Salvează rezultatul în format XML (pentru import în alte utilitare).
+* `-oA <nume_bază>` — Salvează simultan scanarea în toate cele trei formate de bază (`.nmap`, `.gnmap`, `.xml`).
 
-```bash
-nmap -p 21 --script=ftp-anon 10.10.10.10
-```
-
-* **Salvarea rezultatelor în toate formatele ( -oA ):** Generează automat rapoarte în formatele standard, XML și grepable:
-
-```bash
-nmap -oA nmap_scan_results 10.10.10.10
-```
-
+---
 
 ### Comportament Implicit (Default Behavior)
 

@@ -64,25 +64,7 @@ La nivel de transport, Nmap folosește trei mecanisme distincte pentru a determi
 
 ---
 
-#### 5. Scripturi Nmap (NSE - Nmap Scripting Engine)
-* `-sC` — Rulează scripturile implicite (echivalent cu `--script=default`).
-* `--script=<nume|categorie>` — Rulează un script specific sau o întreagă categorie (ex: `--script=vuln`, `--script=safe`, `--script=ftp-anon`).
-* `--script-args=<k=v>` — Trimite argumente specifice către scriptul NSE rulat.
-* `--script-updatedb` — Reconstruiește catalogul `/usr/share/nmap/scripts/script.db` după adăugarea unor fișiere `.nse` noi.
-
----
-
-#### 6. Evaziune Firewall & IDS (Firewall Evasion)
-* `-f` — Fragmentează pachetele IP în bucăți mici de 8 octeți pentru a îngreuna analiza inspectoarelor de pachete.
-* `--mtu <număr>` — Controlează manual dimensiunea MTU a fragmentelor (trebuie să fie un multiplu de 8).
-* `-D <decoy1,decoy2,ME>` — **Decoy scan:** Trimite pachete mascate cu adrese IP false intercalate cu IP-ul tău real pentru a îngropa sursa scanării în log-uri.
-* `-S <IP>` — **Spoof Source Address:** Falsifică adresa IP de origine din pachete.
-* `--badsum` — Trimite pachete cu checksum TCP/UDP/IP invalid deliberat (util pentru demascarea firewall-urilor sau proxy-urilor inline).
-* `--scan-delay <timp>ms` — Adaugă o pauză între cereri (evită blocarea pe bază de rate-limiting).
-
----
-
-#### 7. Ajustarea Vitezei și a Resurselor (Timing & Performance)
+#### 5. Ajustarea Vitezei și a Resurselor (Timing & Performance)
 * `-T<0-5>` — Profile de viteză și agresivitate pentru timing:
   * `-T0` (Paranoid) / `-T1` (Sneaky) — Scanări extrem de lente, folosite pentru evaziune IDS.
   * `-T2` (Polite) — Încetinește traficul pentru a consuma mai puțină lățime de bandă.
@@ -93,7 +75,7 @@ La nivel de transport, Nmap folosește trei mecanisme distincte pentru a determi
 
 ---
 
-#### 8. Filtrarea și Formatarea Rezultatelor (Output & Filtering)
+#### 6. Filtrarea și Formatarea Rezultatelor (Output & Filtering)
 * `-v` / `-vv` — **Verbosity:** Nivel de detaliere crescut; afișează porturile deschise în consolă pe măsură ce sunt găsite și arată timpul estimat (ETA).
 * `--open` — Afișează exclusiv porturile care sunt garantat **deschise** (ignoră stările `closed` și `filtered`).
 * `--reason` — Afișează motivul tehnic exact pentru care un port se află într-o stare anume (ex: `syn-ack`, `conn-refused`, `no-response`).

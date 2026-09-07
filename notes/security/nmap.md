@@ -249,3 +249,35 @@ Scripturile pot fi rulate individual, grupate prin virgulă sau configurate cu p
   # Exemplu:
   nmap --script-help http-put
   ```
+---
+
+#### Localizarea și Gestionarea Scripturilor NSE
+
+Pe sistemele Linux, scripturile NSE sunt stocate local în directorul `/usr/share/nmap/scripts/`.
+
+* **Fișierul `script.db`:** Un fișier text ASCII aflat în directorul de scripturi care servește drept catalog; mapează fiecare fișier `.nse` la categoriile din care face parte (`default`, `safe`, `vuln`, etc.).
+
+* **Căutarea scripturilor local:**
+  * **Filtrare cu `grep` în `script.db` (recomandat):**
+    ```bash
+    # Căutare după serviciu / protocol (ex: ftp):
+    grep "ftp" /usr/share/nmap/scripts/script.db
+
+    # Căutare după categorie specifică:
+    grep '"safe"' /usr/share/nmap/scripts/script.db
+    ```
+  * **Listare directă cu `ls`:**
+    ```bash
+    ls -l /usr/share/nmap/scripts/*ftp*
+    ```
+
+* **Instalarea și actualizarea manuală a scripturilor:**
+  Dacă descarci un script extern sau creezi unul propriu (scris în Lua), acesta trebuie salvat în directorul Nmap, urmat de reconstruirea fișierului catalog:
+  ```bash
+  # 1. Descărcarea scriptului:
+  sudo wget -O /usr/share/nmap/scripts/<nume-script>.nse [https://svn.nmap.org/nmap/scripts/](https://svn.nmap.org/nmap/scripts/)<nume-script>.nse
+
+  # 2. Actualizarea bazei de date de scripturi:
+  sudo nmap --script-updatedb
+  ```
+

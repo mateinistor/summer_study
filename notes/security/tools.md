@@ -52,3 +52,36 @@ dirb [http://10.10.10.10/](http://10.10.10.10/)
 
 ---
 
+## 2. Gobuster
+
+Utilitar rapid scris în Go pentru brute-forcing pe componente web (directoare, fișiere, subdomenii, vhosts). Mult mai rapid decât `dirb` datorită execuției concurente (goroutines).
+
+### Sintaxă de bază (Directory Enumeration)
+```bash
+gobuster dir -u <URL> -w <WORDLIST>
+
+---
+
+### Gobuster Flags
+
+| Flag | Descriere | Exemplu |
+| :--- | :--- | :--- |
+| `dir` | Modul de căutare directoare și fișiere web | `gobuster dir` |
+| `-u` | URL-ul complet al țintei (protocol + host + port) | `-u http://10.10.x.x:3333` |
+| `-w` | Calea către fișierul de tip wordlist | `-w /usr/share/wordlists/dirb/common.txt` |
+| `-x` | Extensii de fișiere căutate (separate prin virgulă) | `-x php,html,txt` |
+| `-t` | Număr de thread-uri concurente (viteză, default: 10) | `-t 50` |
+| `-e` | Afișează URL-ul complet în terminal | `-e` |
+| `-k` | Ignoră verificarea certificatelor SSL (HTTPS invalid) | `-k` |
+| `-o` | Salvează rezultatele într-un fișier text | `-o scan_results.txt` |
+| `-s` | Coduri de status HTTP acceptate (whitelist) | `-s "200,204,301,302,307"` |
+| `-b` | Coduri de status HTTP ignorate (blacklist) | `-b "403,404"` |
+| `-U` | Username pentru HTTP Basic Authentication | `-U admin` |
+| `-P` | Parolă pentru HTTP Basic Authentication | `-P secret123` |
+| `-c` | Cookie transmis în header-ul fiecărui request | `-c "PHPSESSID=xyz123"` |
+| `-p` | Proxy prin care rutezi cererile (ex: Burp Suite) | `-p http://127.0.0.1:8080` |
+| `-z` | Nu afișează bara de progres (reduce output-ul) | `-z` |
+
+---
+
+

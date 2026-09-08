@@ -85,3 +85,66 @@ gobuster dir -u <URL> -w <WORDLIST>
 ---
 
 
+## 3. Burp Suite
+
+Platformă integrată pentru testarea securității aplicațiilor web. Funcționează ca un proxy HTTP/HTTPS de tip Man-in-the-Middle (MitM) între browser și serverul țintă, permițând interceptarea, inspectarea, modificarea și automatizarea cererilor.
+
+### Module principale
+
+| Modul | Rol principal | Scenariu de utilizare |
+| :--- | :--- | :--- |
+| **Proxy** | Interceptează traficul HTTP/HTTPS în timp real | Modificarea parametrilor din formulare, headere, cookie-uri înainte de a ajunge pe server |
+| **Repeater** | Retrimite cereri individuale modificate manual | Testare rapidă pentru SQLi, XSS, bypass-uri de logare fără a reîncărca pagina în browser |
+| **Intruder** | Automatizează atacuri personalizate și fuzzing | Brute-force pe parole/directoare, testare de extensii de fișiere (file upload bypass), IDOR |
+| **Target** | Maparea structurii site-ului (Site Map) | Vizualizarea arborelui complet de endpoint-uri, directoare și parametri descoperiți |
+| **Decoder** | Encodare/decodare rapidă de date | URL encoding, Base64, Hex, HTML entities direct în GUI |
+
+---
+
+### Tipuri de atac în Intruder
+
+* **Sniper:** Folosește un singur set de payload-uri. Dacă sunt marcate mai multe poziții (`§...§`), le testează pe rând, pe fiecare poziție independent.
+* **Battering Ram:** Folosește un singur set de payload-uri, dar inserează **aceeași valoare** în toate pozițiile marcate simultan la fiecare request.
+* **Pitchfork:** Folosește seturi diferite de payload-uri pentru fiecare poziție, iterând prin liste în paralel (linie cu linie: payload1 din lista A cu payload1 din lista B).
+* **Cluster Bomb:** Folosește seturi diferite de payload-uri pentru fiecare poziție și testează **toate permutările posibile** (produs cartezian, ideal pentru username + password brute-force).
+
+---
+
+### Workflow rapid: File Upload Extension Bypass (Intruder)
+
+1. **Setare Proxy:** În browser (Firefox în Kali), navighează prin proxy (`127.0.0.1:8080` sau extensia FoxyProxy).
+2. **Interceptare:** În Burp $\rightarrow$ tab-ul **Proxy** $\rightarrow$ asigură-te că butonul arată `Intercept is on`.
+3. **Upload de test:** Încarcă un fișier din browser. În Burp va apărea cererea `POST /cale/upload`.
+4. **Trimitere la Intruder:** Click dreapta în cerere $\rightarrow$ **Send to Intruder** (sau `Ctrl + I`).
+5. **Setare poziție (Tab-ul Positions):**
+   * Selectează modul de atac: **Sniper**.
+   * Apasă butonul **Clear §**.
+   * Evidențiază doar extensia fișierului în header-ul cererii (ex: `filename="shell§.php§"`) și apasă **Add §**.
+6. **Setare payload (Tab-ul Payloads):**
+   * Payload type: **Simple list**.
+   * Încarcă un dicționar cu extensii (ex: `.php`, `.php3`, `.php4`, `.php5`, `.phtml`).
+7. **Execuție și analiză:**
+   * Apasă **Start Attack**.
+   * Sortează rezultatele după coloana **Length** sau **Status** pentru a identifica răspunsurile care deviază de la eroarea clasică (indică acceptarea fișierului pe server).
+
+---
+
+## 4. Reverse Shell
+
+Tehnică prin care o mașină țintă compromisă inițiază o conexiune de rețea ieșită (outbound) înapoi către mașina atacatorului, oferindu-i acestuia o linie de comandă interactivă (shell).
+
+### Reverse Shell vs. Bind Shell
+
+| Tip Shell | Cine ascultă (Listener) | Cine inițiază conexiunea | Avantaj / Caz de utilizare |
+| :--- | :--- | :--- | :--- |
+| **Reverse Shell** | Atacatorul (`nc -lvnp <port>`) | Ținta (prin payload/script) | Trece ușor de firewall-urile țintei (traficul outbound este de obicei permis) |
+| **Bind Shell** | Ținta deschide un port local | Atacatorul se conectează la IP-ul țintei | Util dacă atacatorul nu are IP rutabil direct sau dacă conexiunile outbound sunt blocate strict |
+
+---
+
+### Componentele unui Reverse Shell
+
+1. **Listener-ul (pe mașina ta - Kali):**
+   Un utilitar de rețea (de regulă `netcat`) configurat să aștepte pasiv conexiunea:
+   ```bash
+   nc -lvnp 1234

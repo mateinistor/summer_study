@@ -59,7 +59,7 @@ Utilitar rapid scris în Go pentru brute-forcing pe componente web (directoare, 
 ### Sintaxă de bază (Directory Enumeration)
 ```bash
 gobuster dir -u <URL> -w <WORDLIST>
-
+```
 ---
 
 ### Gobuster Flags

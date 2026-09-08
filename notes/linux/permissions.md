@@ -22,11 +22,6 @@ Litera `s` înlocuiește bitul `x` la nivelul proprietarului:
 * `rws r-x r-x` $\rightarrow$ SUID activat cu drept de execuție (4755)
 * `rwS r-x r-x` $\rightarrow$ SUID activat, dar **fără** permisiune de execuție (`x`)
 
-Valoarea octală folosește 4 cifre:
-* **`4` = SUID**
-* **`2` = SGID**
-* **`1` = Sticky Bit**
-
 Exemple:
 * `4755` = SUID + `rwxr-xr-x`
 * `4700` = SUID + `rwx------`
@@ -43,3 +38,27 @@ chmod u-s <fisier>     # Dezactivare
 
 # Octal
 chmod 4755 <fisier>
+
+---
+
+### Tabel Biți Speciali (Prima Cifră Octală: 0 - 7)
+
+Cifra din fața celor trei triade standard (`chmod [0-7]rwxrwxrwx`) controlează **SUID**, **SGID** și **Sticky Bit**:
+
+* `4` = **SUID** (*Set owner User ID*)
+* `2` = **SGID** (*Set Group ID*)
+* `1` = **Sticky Bit**
+
+| Valoare | Biți activi | Descriere & Rol practic |
+| :---: | :--- | :--- |
+| **`0`** | Niciunul | Comportament standard (implicit când folosești 3 cifre, ex. `755` = `0755`). |
+| **`1`** | **Sticky Bit** | Doar proprietarul poate șterge/redenumi fișierele din acel director comun (ex. `/tmp` are `1777` $\rightarrow$ `drwxrwxrwt`). |
+| **`2`** | **SGID** | Pe fișiere: rulează cu drepturile grupului. Pe directoare: fișierele nou create moștenesc automat grupul folderului părinte. |
+| **`3`** | **SGID + Sticky** | Combinație `2 + 1`. |
+| **`4`** | **SUID** | Binarul rulează temporar cu privilegiile proprietarului (*owner*). |
+| **`5`** | **SUID + Sticky** | Combinație `4 + 1`. |
+| **`6`** | **SUID + SGID** | Combinație `4 + 2` (capătă identitatea de execuție atât a user-ului, cât și a grupului). |
+| **`7`** | **Toate 3** | SUID + SGID + Sticky Bit (`4 + 2 + 1`). |
+
+
+

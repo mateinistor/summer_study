@@ -85,7 +85,7 @@ gobuster dir -u <URL> -w <WORDLIST>
 ---
 
 
-## 3. Burp Suite
+## 3. BurpSuite
 
 Platformă integrată pentru testarea securității aplicațiilor web. Funcționează ca un proxy HTTP/HTTPS de tip Man-in-the-Middle (MitM) între browser și serverul țintă, permițând interceptarea, inspectarea, modificarea și automatizarea cererilor.
 

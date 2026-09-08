@@ -39,8 +39,7 @@ chmod u-s <fisier>     # Dezactivare
 # Octal
 chmod 4755 <fisier>
 
----
-
+```
 ### Tabel Biți Speciali (Prima Cifră Octală: 0 - 7)
 
 Cifra din fața celor trei triade standard (`chmod [0-7]rwxrwxrwx`) controlează **SUID**, **SGID** și **Sticky Bit**:

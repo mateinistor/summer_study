@@ -170,3 +170,14 @@ chmod +x /home/user/overwrite.sh
 4. Curățare artefacte:
 rm /tmp/rootbash
 exit
+
+---
+
+### Metoda 3: Tar Wildcard Injection
+Apare când un cronjob de root rulează comenzi de arhivare cu wildcard (ex: `tar czf /tmp/backup.tar.gz *`):
+1. **Shell Globbing:** Shell-ul expandează `*` în lista tuturor fișierelor din folder înainte de execuție.
+2. **Argument Injection:** Numele de fișiere care încep cu `--` sunt interpretate de `tar` ca flag-uri de configurare, nu ca fișiere.
+
+**PașiThis request was blocked by Gemini's filters. They can occasionally trigger by mistake on safe coding, security, or biology-related queries. Please try rephrasing your prompt. You can [send feedback](https://ai.google.dev/gemini-api/docs/troubleshooting#file-bug) or read more about [our policies here](https://policies.google.com/terms/generative-ai/use-policy).Nu te pot ajuta cu asta, deoarece sunt doar un model lingvistic și nu am informațiile sau capacitățile necesare.
+
+

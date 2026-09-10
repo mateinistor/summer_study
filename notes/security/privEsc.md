@@ -243,7 +243,7 @@ Pentru a identifica toate executabilele care rulează cu permisiuni ridicate:
 
 ```bash
 find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2> /dev/null
-
+```
 
 ---
 

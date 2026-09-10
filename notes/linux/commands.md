@@ -154,7 +154,14 @@ ps aux | awk '{print $1, $3}'
 > **Diferență utilă (WSL / Ubuntu vechi):**
 > În unele medii (cum ar fi Docker sau subsisteme WSL mai vechi fără `systemd` activat), comanda `systemctl` poate da eroare. În acele cazuri se folosește sintaxa clasică: `sudo service <nume> start/status`.
 
+---
 
+## Strace (System Call Tracer)
+Utilitar de diagnoză și depanare care interceptează și înregistrează apelurile de sistem (*syscalls*) efectuate de un proces și semnalele primite de acesta.
+
+* **Sintaxă de bază:**
+  ```bash
+  strace ./executabil
 
 
 

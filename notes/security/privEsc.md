@@ -243,3 +243,27 @@ Pentru a identifica toate executabilele care rulează cu permisiuni ridicate:
 
 ```bash
 find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2> /dev/null
+
+
+---
+
+
+## 8. SUID Shared Object Injection
+
+### Mecanism & Vulnerabilitate
+La pornirea unui binar compilat cu legare dinamică (*dynamic linking*), sistemul apelează încărcătorul dinamic (*dynamic linker/loader*) pentru a identifica și mapa în memorie fișierele de tip Shared Object (`.so`). 
+
+Vulnerabilitatea apare dacă un executabil cu bitul **SUID** (`root`) îndeplinește simultan două condiții:
+1. Caută o bibliotecă partajată (`.so`) într-un director controlabil de un utilizator neprivilegiat (de exemplu, o cale relativă sau o locație din `/home/user` definită prin `RPATH`/`RUNPATH`).
+2. Biblioteca respectivă lipsește de pe disc, permițând crearea unui fișier arbitrar cu același nume în directorul vizat.
+
+Când binarul este relansat, biblioteca malițioasă este încărcată direct în spațiul de adrese al procesului și rulează sub contextul de securitate al deținătorului binarului (`root`).
+
+---
+
+### Detectare și Enumerare cu `strace`
+
+Pentru a intercepta apelurile de sistem de deschidere și verificare a fișierelor:
+
+```bash
+strace /usr/local/bin/suid-so 2>&1 | grep -iE "open|access|no such file"

@@ -466,6 +466,50 @@ Pentru a identifica fișiere de configurare cu potențiale credențiale în dire
    su root
    ```
 
+---
+
+## 14. Information Leakage via Exposed SSH Private Keys
+
+### Mecanism & Vulnerabilitate
+Autentificarea pe bază de chei SSH folosește o pereche criptografică: o cheie publică (stocată pe server) și o cheie privată (păstrată de utilizator). Cheia privată acționează ca o identitate digitală supremă și oferă acces direct la cont fără a mai solicita o parolă.
+
+Din motive de securitate, o cheie privată trebuie să fie protejată cu permisiuni restrictive (ex: `chmod 600`), fiind accesibilă exclusiv proprietarului ei. Vulnerabilitatea apare atunci când administratorii creează backup-uri nesecurizate sau directoare ascunse în rădăcina sistemului (ex: `/.ssh/`) și lasă cheile private de `root` cu drepturi de citire globale (*world-readable*). Orice utilizator local neprivilegiat poate citi și copia cheia pentru a se autentifica direct ca administrator.
+
+### Enumerare și Detectare
+
+1. **Identificarea directoarelor suspecte în rădăcina sistemului:**
+   Verifică prezența fișierelor sau directoarelor ascunse direct în `/`:
+   ```bash
+   ls -la /
+   ```
+
+2. **Inspectarea conținutului directorului SSH expus:**
+   Dacă se observă un director precum `/.ssh`, listează fișierele din interior pentru a căuta chei private:
+   ```bash
+   ls -l /.ssh
+   ```
+   *Un fișier precum `root_key` sugerează direct deținătorul și scopul acelei chei.*
+
+### Etape de Exploatare (PoC)
+
+1. **Exfiltrarea cheii private:**
+   Afișează conținutul cheii pe mașina țintă și copiază textul în întregime (inclusiv liniile de început și sfârșit de tip `-----BEGIN RSA PRIVATE KEY-----`) într-un fișier local de pe mașina de atac (ex: Kali Linux):
+   ```bash
+   cat /.ssh/root_key
+   ```
+
+2. **Securizarea locală a cheii (Obligatoriu):**
+   Clienții SSH moderni refuză conexiunea dacă fișierul cheii private are permisiuni prea open. Restricționează accesul pe mașina de atac:
+   ```bash
+   chmod 600 root_key
+   ```
+
+3. **Conectarea prin SSH ca Root:**
+   Invocă conexiunea SSH folosind cheia privată. Pe sisteme legacy (mașini de laborator mai vechi), este necesară activarea manuală a algoritmilor criptografici mai vechi prin parametri dedicați:
+   ```bash
+   ssh -i root_key -oPubkeyAcceptedKeyTypes=+ssh-rsa -oHostKeyAlgorithms=+ssh-rsa root@<IP_TINTA>
+   ```
+
 
 
 

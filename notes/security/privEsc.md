@@ -404,6 +404,35 @@ Atacul este fezabil dacă binarul țintă are bitul SUID setat și versiunea de 
    exit
    ```
 
+---
+
+## 12. Information Leakage via Shell History Files
+
+### Mecanism & Vulnerabilitate
+O eroare frecventă de operare apare atunci când utilizatorii sau administratorii introduc parole direct în linia de comandă (ca argumente transmise unor utilitare precum `mysql`, `ftp`, `ssh` sau scripturi custom), în loc să aștepte promptul securizat de introducere a credențialelor.
+
+Majoritatea shell-urilor (Bash, Zsh) salvează automat istoricul tuturor comenzilor rulate într-un fișier text ascuns din folderul de casă al utilizatorului (ex: `.bash_history` sau `.zsh_history`). Dacă aceste fișiere pot fi citite de un atacator local, acesta poate extrage parole uitate în clar.
+
+### Enumerare și Detectare
+Pentru a investiga dacă s-au scurs credențiale în istoricul sesiunilor trecute, se inspectează toate fișierele ascunse de istoric din directorul `home`:
+
+```bash
+cat ~/.*history | less
+```
+
+*Notă utilă pentru investigație:* Se caută în mod special comenzi de conectare la baze de date (ex: `mysql -uroot -p...`), unde adesea nu există spațiu între opțiunea `-p` și parola introdusă.
+
+### Etape de Exploatare (PoC)
+
+1. **Identificarea parolei expuse:**
+   În urma rulării comenzii de vizualizare a istoricului, s-a descoperit o tentativă anterioară de conectare la serverul MySQL care conținea parola contului administrativ de sistem.
+
+2. **Obținerea accesului de root:**
+   Folosind parola identificată în istoric, se rulează comanda de schimbare a utilizatorului curent cu cel de `root`:
+   ```bash
+   su root
+   ```
+
 
 
 

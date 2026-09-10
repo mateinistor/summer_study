@@ -267,3 +267,7 @@ Pentru a intercepta apelurile de sistem de deschidere și verificare a fișierel
 
 ```bash
 strace /usr/local/bin/suid-so 2>&1 | grep -iE "open|access|no such file"
+```
+
+Pentru detalii avansate, citește despre [Utilizarea Strace](/notes/linux/troubleshooting.md#1-monitorizarea-apelurilor-de-sistem-cu-strace).
+

@@ -561,4 +561,48 @@ cat /etc/exports
    ```
 
 
+---
+
+## 16. Linux Kernel Exploits - Dirty COW (CVE-2016-5195)
+
+### Mecanism & Vulnerabilitate
+Spre deosebire de erorile de configurare (permisiuni greșite, SUID sau scurgeri de date), un **Kernel Exploit** profită de o breșă de securitate din însuși nucleul sistemului de operare pentru a forța obținerea de drepturi administrative.
+
+Vulnerabilitatea **Dirty COW** se bazează pe o eroare de sincronizare de tip *Race Condition* în subsistemul de memorie al kernelului Linux, mai exact în mecanismul **Copy-on-Write (COW)**. Atacatorul folosește această slăbiciune pentru a sparge logica de protecție a memoriei, forțând sistemul să scrie modificări direct pe hard disk în fișiere protejate, la care utilizatorul curent are în mod normal drepturi doar de citire (*read-only*). Acest lucru permite unui utilizator local neprivilegiat să modifice sau să înlocuiască orice fișier vital deținut de `root`.
+
+### Enumerare și Detectare
+Pentru a identifica dacă versiunea curentă de kernel este vulnerabilă la Dirty COW sau la alte exploit-uri cunoscute, se rulează un utilitar automat de scanare:
+
+```bash
+perl /home/user/tools/kernel-exploits/linux-exploit-suggester-2/linux-exploit-suggester-2.pl
+```
+*Scriptul analizează versiunea de kernel raportată de sistem și afișează o listă cu exploit-urile de kernel aplicabile.*
+
+### Etape de Exploatare (PoC)
+
+1. **Compilarea codului sursă:**
+   Compilăm codul în C al exploit-ului (`c0w.c`). Opțiunea `-pthread` este obligatorie, deoarece atacul are nevoie de fire de execuție simultane pentru a declanșa eroarea de sincronizare în kernel:
+   ```bash
+   gcc -pthread /home/user/tools/kernel-exploits/dirtycow/c0w.c -o c0w
+   ```
+
+2. **Rularea exploit-ului:**
+   Executăm binarul compilat. Acesta va folosi bug-ul din kernel pentru a suprascrie executabilul legitim `/usr/bin/passwd` (un binar SUID deținut de root) cu un payload custom care spawnează un shell, salvând în prealabil originalul în `/tmp/bak`:
+   ```bash
+   ./c0w
+   ```
+   *Notă: Acest proces poate dura câteva minute până când firele de execuție reușesc să exploateze cu succes memoria.*
+
+3. **Declanșarea shell-ului de root:**
+   Invocăm binarul modificat de pe sistem. Rularea lui va executa acum direct payload-ul nostru sub contextul de securitate de root:
+   ```bash
+   /usr/bin/passwd
+   ```
+
+4. **Restaurarea sistemului (Critic):**
+   Exploit-urile de kernel pot lăsa sistemul instabil. Pentru a repara binarul de sistem afectat și a nu bloca funcțiile mașinii, restaurăm fișierul original din backup și părăsim shell-ul:
+   ```bash
+   mv /tmp/bak /usr/bin/passwd
+   exit
+   ```
 

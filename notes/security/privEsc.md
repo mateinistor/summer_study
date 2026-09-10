@@ -433,6 +433,39 @@ cat ~/.*history | less
    su root
    ```
 
+---
+
+## 13. Information Leakage via Configuration Files
+
+### Mecanism & Vulnerabilitate
+Fișierele de configurare pentru servicii de rețea (ex: `.ovpn` pentru OpenVPN), conexiuni la baze de date (ex: `config.php`, `wp-config.php`) sau scripturi de automatizare conțin adesea parole în clar (*plaintext*) sau rute către alte fișiere securizate pentru a permite autentificarea automată.
+
+Vulnerabilitatea apare atunci când aceste fișiere sensibile sunt lăsate în directoare comune sau în folderul de casă al unui utilizator (`/home/user`) cu permisiuni de citire mult mai permisive decât ar fi necesar (absența unei restricții de tip `chmod 600`). Orice atacator cu acces local pe sistem poate citi aceste fișiere pentru a extrage secrete sau indicii care duc la compromiterea contului de `root`.
+
+### Enumerare și Detectare
+Pentru a identifica fișiere de configurare cu potențiale credențiale în directorul de casă sau în alte locații standard:
+
+1. **Listarea fișierelor din directorul utilizatorului:**
+   ```bash
+   ls -la /home/user
+   ```
+
+2. **Inspectarea conținutului fișierelor suspecte (ex: fișiere VPN sau configurări de servicii):**
+   ```bash
+   cat /home/user/myvpn.ovpn
+   ```
+
+### Etape de Exploatare (PoC)
+
+1. **Identificarea credențialelor sau a referințelor:**
+   În urma citirii fișierului `myvpn.ovpn`, s-a descoperit o referință (o cale absolută sau un indiciu direct) către locația unde erau stocate credențialele legitime ale utilizatorului `root`.
+
+2. **Tranziția către contul privilegiat:**
+   După obținerea parolei din locația indicată în configurare, se folosește comanda de switch user pentru a obține accesul administrativ:
+   ```bash
+   su root
+   ```
+
 
 
 

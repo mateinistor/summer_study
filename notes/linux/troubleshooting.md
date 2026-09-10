@@ -26,7 +26,7 @@ Utilitar de diagnosticare și depanare la nivel de nucleu (kernel) care intercep
 * **Rularea unui binar sub monitorizare:**
   ```bash
   strace ./executabil
-```
+  ```
 
 ### Scenarii Practice de Depanare (Troubleshooting)
 
@@ -36,7 +36,7 @@ Identifică fișierele pe care programul încearcă să le deschidă, dar eșuea
 
    ```bash
    strace ./executabil 2>&1 | grep -iE "open|access|no such file"
-   ```
+ ```
 
 * **Depistarea problemelor de permisiuni ascunse:**
 

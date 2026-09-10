@@ -26,7 +26,7 @@ Utilitar de diagnosticare și depanare la nivel de nucleu (kernel) care intercep
 * **Rularea unui binar sub monitorizare:**
   ```bash
   strace ./executabil
-  ```
+```
 
 ### Scenarii Practice de Depanare (Troubleshooting)
 

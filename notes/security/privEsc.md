@@ -174,10 +174,54 @@ exit
 ---
 
 ### Metoda 3: Tar Wildcard Injection
-Apare când un cronjob de root rulează comenzi de arhivare cu wildcard (ex: `tar czf /tmp/backup.tar.gz *`):
-1. **Shell Globbing:** Shell-ul expandează `*` în lista tuturor fișierelor din folder înainte de execuție.
-2. **Argument Injection:** Numele de fișiere care încep cu `--` sunt interpretate de `tar` ca flag-uri de configurare, nu ca fișiere.
 
-**PașiThis request was blocked by Gemini's filters. They can occasionally trigger by mistake on safe coding, security, or biology-related queries. Please try rephrasing your prompt. You can [send feedback](https://ai.google.dev/gemini-api/docs/troubleshooting#file-bug) or read more about [our policies here](https://policies.google.com/terms/generative-ai/use-policy).Nu te pot ajuta cu asta, deoarece sunt doar un model lingvistic și nu am informațiile sau capacitățile necesare.
+#### Mecanism & Vulnerabilitate
+Apare atunci când un cronjob deținut de `root` execută o arhivare folosind caracterul generic `*` (ex: `tar czf /tmp/backup.tar.gz *`):
+1. **Shell Globbing:** Înainte de apelul utilitarului `tar`, interpretorul Bash expandează caracterul `*` în lista completă a numelor de fișiere din directorul curent.
+2. **Argument Injection:** Numele de fișiere create special care încep cu `--` sunt interpretate de `tar` ca opțiuni de configurare (flags), nu ca fișiere destinate arhivării.
 
+#### Exploatare (Checkpoint Flags)
+Utilitarul `tar` include funcționalități de checkpointing ce permit execuția de comenzi:
+* `--checkpoint=1`: Declanșează o acțiune la fiecare înregistrare procesată.
+* `--checkpoint-action=exec=<payload>`: Execută instrucțiunea specificată cu drepturile procesului părinte (`root`).
+
+#### Pași de reproducere
+1. Pregătirea payload-ului pe mașina țintă (exemplu: shell inversat sau binar privilegiat):
+   ```bash
+   chmod +x /home/user/shell.elf
+   ```
+2. Crearea fișierelor ce vor acționa ca argumente injectate în comanda `tar`:
+   ```bash
+   touch /home/user/--checkpoint=1
+   touch /home/user/--checkpoint-action=exec=shell.elf
+
+---
+
+## Concept: Reverse Shell
+
+### Definiție & Arhitectură
+Un **Reverse Shell** este o tehnică prin care o mașină țintă inițiază o conexiune de rețea outbound (ieșire) către un listener controlat de administrator/atacator, atașând un interpretor de comenzi (`/bin/sh` sau `/bin/bash`) la acel canal de comunicație.
+
+* **Bind Shell (Tradițional):** Ținta deschide un port local și așteaptă conexiuni inbound. Deseori blocat de firewall-uri perimetrice și politici de filtrare a traficului de intrare.
+* **Reverse Shell (Inversat):** Ținta acționează drept client și se conectează în exterior. Ocolește politicile standard de ingress firewall și restricțiile impuse de NAT, traficul de ieșire fiind frecvent permis.
+
+---
+
+### Mecanism Intern (Linux I/O & Syscalls)
+În arhitectura Unix, „totul este un fișier”, iar fiecare proces utilizează trei descriptori standard de intrare/ieșire:
+* `0` — `stdin` (tastatură / intrare)
+* `1` — `stdout` (ecran / ieșire normală)
+* `2` — `stderr` (ecran / ieșire de eroare)
+
+La nivelul nucleului Linux, un payload de reverse shell execută următorul flux:
+1. **`socket()` & `connect()`:** Creează un socket TCP și se conectează la IP-ul și portul listener-ului (obținând un descriptor, de ex. `fd 3`).
+2. **`dup2()`:** Duplică descriptorul de socket peste canalele standard (`dup2(fd, 0)`, `dup2(fd, 1)`, `dup2(fd, 2)`). În acest mod, intrarea și ieșirile procesului sunt legate direct la conexiunea de rețea.
+3. **`execve()`:** Instanțiază interpretorul de comenzi (`/bin/sh`), care moștenește descriptorii redirecționați. Orice comandă trimisă prin rețea este executată de shell, iar output-ul este transmis înapoi prin socket.
+
+---
+
+### Relația cu Privilege Escalation
+În procesul de escaladare a privilegiilor (ex: exploatarea unui Cron Job executat de `root`):
+* Dacă binarul de reverse shell este lansat de un proces privilegiat (`UID 0`), procesul fiu (`/bin/sh`) moștenește contextul de securitate al părintelui.
+* Listener-ul extern primește astfel o sesiune interactivă direct cu drepturi depline de administrator (`root`).
 

@@ -225,3 +225,21 @@ La nivelul nucleului Linux, un payload de reverse shell execută următorul flux
 * Dacă binarul de reverse shell este lansat de un proces privilegiat (`UID 0`), procesul fiu (`/bin/sh`) moștenește contextul de securitate al părintelui.
 * Listener-ul extern primește astfel o sesiune interactivă direct cu drepturi depline de administrator (`root`).
 
+---
+
+
+## 7. SUID / SGID Executables
+
+### Concepte Cheie
+* **SUID (Set User ID):** Bit de permisiune (`u+s`) care face ca un binar executabil să ruleze cu privilegiile **proprietarului fișierului** (frecvent `root`), nu cu cele ale utilizatorului care îl invocă.
+* **SGID (Set Group ID):** Bit de permisiune (`g+s`) similar, care moștenește drepturile **grupului** deținător.
+* **Suprafață de Atac:** Dacă un binar SUID deținut de `root` conține o vulnerabilitate (de tip buffer overflow, command injection sau logică de configurare nesigură), un utilizator local poate obține execuție de cod arbitrar direct cu privilegii depline.
+
+---
+
+### Enumerare SUID/SGID pe Sistem
+
+Pentru a identifica toate executabilele care rulează cu permisiuni ridicate:
+
+```bash
+find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2> /dev/null

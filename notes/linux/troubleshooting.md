@@ -36,7 +36,7 @@ Identifică fișierele pe care programul încearcă să le deschidă, dar eșuea
 
    ```bash
    strace ./executabil 2>&1 | grep -iE "open|access|no such file"
- ```
+   ```
 
 * **Depistarea problemelor de permisiuni ascunse:**
 

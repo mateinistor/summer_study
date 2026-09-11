@@ -159,7 +159,7 @@ Utilizat pentru scanarea și enumerarea detaliată a serviciilor **SMB/Samba** (
 
 * **Comandă completă (cu salvare în log):**
   ```bash
-  /opt/enum4linux/enum4linux.pl -a <IP_TINTA> | tee enum4linux.log
+	enum4linux -a 10.112.162.101 | tee enum4linux.log
   ```
 * **Opțiuni cheie:**
   * `-a` (All): Rulează toate testele de enumerare posibile (utilizatori, grupuri, share-uri, politici).

@@ -289,3 +289,40 @@ john --show cheie.hash
 ```
 
 ---
+
+---
+
+## 📂 11. Extragerea de Date prin FTP (File Transfer Protocol)
+
+Protocolul FTP (portul implicit 21) este utilizat frecvent în laboratoare pentru exfiltrarea sau descărcarea de fișiere de pe mașina țintă.
+
+* **Conectarea de bază la serverul FTP:**
+  ```bash
+  ftp <IP_TINTA>
+  ```
+  *Sistemul va solicita introducerea unui username și a unei parole.*
+
+* **Descărcarea unui singur fișier (După ce te-ai conectat):**
+  ```ftp
+  get nume_fișier.extensie
+  ```
+
+* **Descărcarea mai multor fișiere simultan (Multi-get):**
+  ```ftp
+  mget *
+  ```
+
+#### ⚙️ Comenzi interne esențiale în prompt-ul FTP:
+* `ls` / `dir` : Listează fișierele și directoarele disponibile pe serverul FTP.
+* `cd <director>` : Schimbă folderul curent de pe server.
+* `binary` : Comandă extrem de importantă rulată înainte de descărcare pentru a forța transferul în mod binar (asigură că imaginile, arhivele sau binarele executabile nu se corup în timpul transferului).
+* `ascii` : Schimbă modul de transfer pentru fișiere text simple (modul implicit).
+* `prompt` : Dezactivează confirmarea interactivă (Yes/No) pentru fiecare fișier în parte atunci când folosești `mget *`.
+* `exit` / `quit` : Închide sesiunea FTP și te întoarce în terminalul Linux.
+
+#### 💡 Trucuri utile în laboratoarele TryHackMe:
+1. **Autentificarea Anonimă (Anonymous Login):** Multe servere FTP configurate greșit în laboratoare permit logarea fără cont valid. Când sistemul îți cere username, scrie `anonymous` sau `ftp`, iar la parolă apasă pur și simplu **Enter** (lasă gol).
+2. **Unde ajung fișierele?** Fișierele descărcate prin comanda `get` sau `mget` vor apărea local în folderul de pe mașina ta Kali **din care ai rulat comanda inițială** `ftp <IP_TINTA>`.
+
+
+

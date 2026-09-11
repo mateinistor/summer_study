@@ -236,3 +236,56 @@ Aceste unelte sunt colecții de comenzi Bash automate care auditează sistemul l
 * **`lse.sh` (Linux Smart Enumeration)**: Filtrează rezultatele în funcție de nivelul de detalii dorit (opțiunea `-l 0` arată doar erorile critice).
 * **`LinEnum.sh`**: Unealtă clasică și foarte stabilă pentru un sumar curat al drepturilor Sudo și SUID.
 
+---
+
+## 🔑 9. Conectarea prin SSH cu Cheie Privată
+
+Atunci când ai obținut o cheie privată (ex: `root_key` sau `id_rsa`), o poți folosi pentru a obține acces direct pe server fără a mai introduce o parolă de utilizator.
+
+* **Comanda de bază:**
+  ```bash
+  ssh -i /cale/catre/cheie_privata username@<IP_TINTA>
+  ```
+
+#### ⚙️ Pași Obligatorii și Flag-uri:
+1. **Modificarea permisiunilor (Critic):** Înainte de conectare, fișierul cheii trebuie restricționat. Dacă permisiunile sunt prea deschise, clientul SSH va refuza execuția din motive de securitate:
+   ```bash
+   chmod 600 /cale/catre/cheie_privata
+   ```
+2. `-i` : Specifică fișierul de identitate (cheia privată).
+
+#### ⚠️ Depanare: Conexiune pe mașini vechi (Legacy Systems)
+Dacă serverul de laborator este învechit, clienții SSH moderni de pe Kali vor bloca conexiunea din cauza algoritmilor criptografici depășiți (`ssh-rsa`). Pentru a forța compatibilitatea, adaugă manual acești parametri:
+
+```bash
+ssh -i /cale/catre/cheie_privata -oPubkeyAcceptedKeyTypes=+ssh-rsa -oHostKeyAlgorithms=+ssh-rsa username@<IP_TINTA>
+```
+
+---
+
+## 🔨 2. Spargerea Parolelor Cheilor SSH (SSH Passphrase Cracking)
+
+Dacă încerci să folosești cheia privată și sistemul îți solicită o parolă (*passphrase*), înseamnă că acea cheie este criptată. Putem sparge această parolă offline folosind **John the Ripper**.
+
+Deoarece John nu poate citi direct fișierul cheii, atacul se realizează în doi pași:
+
+### Pasul 1: Conversia cheii în Hash (`ssh2john`)
+Transformăm cheia privată într-un format text (hash) pe care John îl poate procesa:
+```bash
+python3 /usr/share/john/ssh2john.py root_key > cheie.hash
+```
+*(Notă: Pe unele sisteme comanda globală poate fi apelată direct prin `ssh2john root_key > cheie.hash`)*.
+
+### Pasul 2: Atacul de tip Dicționar cu John
+Rulăm procesul de brute-force offline folosind lista clasică de parole `rockyou.txt`:
+```bash
+john --wordlist=/usr/share/wordlists/rockyou.txt cheie.hash
+```
+
+### Pasul 3: Afișarea parolei identificate
+Dacă John a găsit o potrivire în dicționar, poți revedea parola extrasă oricând rulând:
+```bash
+john --show cheie.hash
+```
+
+---

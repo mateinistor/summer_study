@@ -263,7 +263,7 @@ ssh -i /cale/catre/cheie_privata -oPubkeyAcceptedKeyTypes=+ssh-rsa -oHostKeyAlgo
 
 ---
 
-## 🔨 2. Spargerea Parolelor Cheilor SSH (SSH Passphrase Cracking)
+## 🔨 10. Spargerea Parolelor Cheilor SSH (SSH Passphrase Cracking)
 
 Dacă încerci să folosești cheia privată și sistemul îți solicită o parolă (*passphrase*), înseamnă că acea cheie este criptată. Putem sparge această parolă offline folosind **John the Ripper**.
 

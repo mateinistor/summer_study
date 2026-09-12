@@ -325,4 +325,48 @@ Protocolul FTP (portul implicit 21) este utilizat frecvent în laboratoare pentr
 2. **Unde ajung fișierele?** Fișierele descărcate prin comanda `get` sau `mget` vor apărea local în folderul de pe mașina ta Kali **din care ai rulat comanda inițială** `ftp <IP_TINTA>`.
 
 
+---
+
+
+## 📂 12. Enumerare și Extragere de Date prin `curl` (Client URL)
+
+Protocolul HTTP/HTTPS (porturile implicite **80/443**) este principala poartă de acces în aplicațiile web. Utilitarul `curl` este folosit pentru a interacționa rapid cu serverul direct din terminal.
+
+* **Trimiterea unei cereri HTTP simple (GET):**
+  ```bash
+  curl http://<IP_TINTA>/
+  ```
+  *Afișează codul sursă HTML al paginii direct în terminal.*
+
+* **Vizualizarea antetelor de răspuns (HTTP Headers):**
+  ```bash
+  curl -I http://<IP_TINTA>/
+  ```
+  *Afișează doar metadatele serverului (tipul de server, versiunea, cookie-urile setate).*
+
+* **Modificarea antetului User-Agent (User-Agent Spoofing):**
+  ```bash
+  curl -H "User-Agent: <NUME_AGENT>" http://<IP_TINTA>/
+  ```
+  *Trimite un header personalizat pentru a ocoli filtrele care restricționează accesul în funcție de browser sau agent.*
+
+* **Urmărirea automată a redirecționărilor web:**
+  ```bash
+  curl -L http://<IP_TINTA>/
+  ```
+  *Forțează utilitarul să urmărească codurile de status 301/302 și să afișeze pagina finală la care ești trimis.*
+
+* **Salvarea conținutului paginii sau a unui fișier la distanță:**
+  ```bash
+  curl -o fisier_salvat.html http://<IP_TINTA>/pagina.php
+  ```
+  *Descarcă și salvează output-ul serverului într-un fișier local specificat.*
+
+* **Vizualizarea întregului trafic (Modul Verbose):**
+  ```bash
+  curl -v http://<IP_TINTA>/
+  ```
+  *Afișează atât cererea trimisă de tine (request), cât și răspunsul complet al serverului (response).*
+
+
 

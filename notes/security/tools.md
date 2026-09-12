@@ -415,7 +415,7 @@ După descărcarea fișierelor media (imagini, audio) de pe serverul FTP sau web
 
 ---
 
-## 📂 15. Căutarea Vulnerabilităților și Exploit-urilor (Searchsploit & CVE)
+## 15. Căutarea Vulnerabilităților și Exploit-urilor (Searchsploit & CVE)
 
 Când identifici servicii învechite sau versiuni specifice de software în faza de scanare (de exemplu, prin `nmap`), următorul pas este verificarea bazelor de date pentru vulnerabilități cunoscute (CVE) și exploit-uri publice.
 

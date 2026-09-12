@@ -413,5 +413,49 @@ După descărcarea fișierelor media (imagini, audio) de pe serverul FTP sau web
   ```
   *Extrage brut toate tipurile de semnături identificate în fișier.*
 
+---
+
+## 📂 15. Căutarea Vulnerabilităților și Exploit-urilor (Searchsploit & CVE)
+
+Când identifici servicii învechite sau versiuni specifice de software în faza de scanare (de exemplu, prin `nmap`), următorul pas este verificarea bazelor de date pentru vulnerabilități cunoscute (CVE) și exploit-uri publice.
+
+### 🔎 Ce este `searchsploit`?
+`searchsploit` este o unealtă în linie de comandă pentru **Exploit Database (Exploit-DB)**, permițându-ți să cauți exploit-uri stocate local pe mașina ta de Kali Linux, fără a avea nevoie de conexiune la internet.
+
+---
+
+### 🔥 Comenzi Esențiale `searchsploit`
+
+* **Căutarea de bază după numele serviciului și versiune:**
+  ```bash
+  searchsploit <nume_serviciu> <versiune>
+  ```
+  *Exemplu: `searchsploit openssh 7.2`. Returnează o listă cu exploit-uri (scripturi Python, cod C, module Metasploit) și căile lor.*
+
+* **Căutarea exactă după un cod CVE (Common Vulnerabilities and Exposures):**
+  ```bash
+  searchsploit --cve CVE-XXXX-XXXX
+  ```
+  *Filtrează baza de date locală direct după identificatorul unic al vulnerabilității.*
+
+* **Copierea unui exploit în directorul curent de lucru:**
+  ```bash
+  searchsploit -m <id_exploit_sau_cale>
+  ```
+  *`-m` (mirror) copiază automat scriptul găsit direct în folderul tău, fără a fi nevoie să navighezi manual prin directoarele sistemului.*
+
+* **Examinarea codului sursă al unui exploit (fără a-l copia):**
+  ```bash
+  searchsploit -x <id_exploit_sau_cale>
+  ```
+  *`-x` (examine) deschide conținutul scriptului direct în terminal pentru a-i citi instrucțiunile sau comentariile (foarte util pentru a vedea ce parametri cere).*
+
+* **Actualizarea bazei de date locale de exploit-uri:**
+  ```bash
+  searchsploit -u
+  ```
+  *Sincronizează baza locală cu cele mai noi exploit-uri apărute pe Exploit-DB.*
+
+
 
 

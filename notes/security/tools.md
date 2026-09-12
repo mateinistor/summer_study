@@ -152,7 +152,7 @@ Tehnică prin care o mașină țintă compromisă inițiază o conexiune de reț
 ---
 
 
-## 🔍 5. Enumerare Servicii de Rețea
+## 5. Enumerare Servicii de Rețea
 
 ### enum4linux
 Utilizat pentru scanarea și enumerarea detaliată a serviciilor **SMB/Samba** (porturile 139/445) pe sisteme Windows și Linux. Este ideal pentru extragerea numelor de utilizatori și a mapelor partajate.
@@ -167,7 +167,7 @@ Utilizat pentru scanarea și enumerarea detaliată a serviciilor **SMB/Samba** (
 
 ---
 
-## 💣 6. Atacuri prin Forță Brută (Brute Forcing)
+## 6. Atacuri prin Forță Brută (Brute Forcing)
 
 ### Hydra
 Unul dintre cele mai rapide și flexibile instrumente pentru spargerea credențialelor (username/parolă) pe diverse protocoale (SSH, SMB, FTP, HTTP Form).
@@ -189,7 +189,7 @@ Unul dintre cele mai rapide și flexibile instrumente pentru spargerea credenți
 
 ---
 
-## 📦 7. Transfer de Fișiere în Laborator
+## 7. Transfer de Fișiere în Laborator
 
 ### Python HTTP Server (Sursa)
 Cea mai rapidă metodă de a transforma mașina de atac într-un server web temporar pentru a livra scripturi sau payload-uri.
@@ -228,7 +228,7 @@ scp -oHostKeyAlgorithms=+ssh-rsa -oPubkeyAcceptedKeyTypes=+ssh-rsa -r <username>
 
 ---
 
-## 🤖 8. Scripturi de Enumerare Automată (Post-Exploatare)
+## 8. Scripturi de Enumerare Automată (Post-Exploatare)
 
 Aceste unelte sunt colecții de comenzi Bash automate care auditează sistemul local pentru a găsi vectori de Privilege Escalation.
 
@@ -238,7 +238,7 @@ Aceste unelte sunt colecții de comenzi Bash automate care auditează sistemul l
 
 ---
 
-## 🔑 9. Conectarea prin SSH cu Cheie Privată
+## 9. Conectarea prin SSH cu Cheie Privată
 
 Atunci când ai obținut o cheie privată (ex: `root_key` sau `id_rsa`), o poți folosi pentru a obține acces direct pe server fără a mai introduce o parolă de utilizator.
 
@@ -263,7 +263,7 @@ ssh -i /cale/catre/cheie_privata -oPubkeyAcceptedKeyTypes=+ssh-rsa -oHostKeyAlgo
 
 ---
 
-## 🔨 10. Spargerea Parolelor Cheilor SSH (SSH Passphrase Cracking)
+## 10. Spargerea Parolelor Cheilor SSH (SSH Passphrase Cracking)
 
 Dacă încerci să folosești cheia privată și sistemul îți solicită o parolă (*passphrase*), înseamnă că acea cheie este criptată. Putem sparge această parolă offline folosind **John the Ripper**.
 
@@ -292,7 +292,7 @@ john --show cheie.hash
 
 ---
 
-## 📂 11. Extragerea de Date prin FTP (File Transfer Protocol)
+## 11. Extragerea de Date prin FTP (File Transfer Protocol)
 
 Protocolul FTP (portul implicit 21) este utilizat frecvent în laboratoare pentru exfiltrarea sau descărcarea de fișiere de pe mașina țintă.
 
@@ -328,7 +328,7 @@ Protocolul FTP (portul implicit 21) este utilizat frecvent în laboratoare pentr
 ---
 
 
-## 📂 12. Enumerare și Extragere de Date prin `curl` (Client URL)
+## 12. Enumerare și Extragere de Date prin `curl` (Client URL)
 
 Protocolul HTTP/HTTPS (porturile implicite **80/443**) este principala poartă de acces în aplicațiile web. Utilitarul `curl` este folosit pentru a interacționa rapid cu serverul direct din terminal.
 
@@ -367,6 +367,51 @@ Protocolul HTTP/HTTPS (porturile implicite **80/443**) este principala poartă d
   curl -v http://<IP_TINTA>/
   ```
   *Afișează atât cererea trimisă de tine (request), cât și răspunsul complet al serverului (response).*
+
+
+---
+
+## 13. Analiza Steganografică și Extragerea Datelor (Steghide & Binwalk)
+
+După descărcarea fișierelor media (imagini, audio) de pe serverul FTP sau web, tehnicile de steganografie sunt folosite pentru a descoperi date sau arhive ascunse în interiorul acestora.
+
+### 🔍 Utilizarea `steghide`
+`steghide` este un instrument folosit pentru a ascunde sau a extrage date confidențiale dintr-un fișier imagine (JPEG, BMP) sau audio (WAV, AU) folosind o parolă (passphrase).
+
+* **Extragerea datelor ascunse dintr-o imagine:**
+  ```bash
+  steghide extract -sf <nume_imagine.jpg>
+  ```
+  *Sistemul va solicita introducerea parolei descoperite în fazele anterioare (`-sf` specifică fișierul sursă).*
+
+* **Vizualizarea informațiilor despre fișierul stego (fără extragere):**
+  ```bash
+  steghide info <nume_imagine.jpg>
+  ```
+  *Afișează dacă imaginea conține date ascunse, formatul acestora și algoritmul de criptare folosit.*
+
+---
+
+### 📦 Utilizarea `binwalk`
+`binwalk` este un instrument de analiză firmware și analiză stego conceput pentru a căuta fișiere înglobate, cod sau imagini de sistem în interiorul unui singur fișier mare.
+
+* **Scanarea unui fișier pentru a detecta date ascunse:**
+  ```bash
+  binwalk <nume_imagine.jpg>
+  ```
+  *Analizează semnăturile binare și afișează o listă cu fișierele sau arhivele (ex: `.zip`, `.tar.gz`) ascunse în interior.*
+
+* **Extragerea automată a tuturor fișierelor descoperite:**
+  ```bash
+  binwalk -e <nume_imagine.jpg>
+  ```
+  *`-e` (extract) extrage automat tot ce găsește în interiorul fișierului și salvează datele într-un director nou numit `_<nume_imagine>.extracted`.*
+
+* **Extragerea forțată a fișierelor (în caz de erori):**
+  ```bash
+  binwalk --dd=".*" <nume_imagine.jpg>
+  ```
+  *Extrage brut toate tipurile de semnături identificate în fișier.*
 
 
 

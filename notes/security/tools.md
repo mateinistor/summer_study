@@ -632,5 +632,63 @@ exploit
 
 Dacă exploit-ul are succes, modulul va profita de vulnerabilitate și va deschide automat o sesiune de tip **Meterpreter** sau un **Reverse Shell** direct cu drepturi de **root**, ocolind complet faza de Escaladare a Privilegiilor (deoarece serviciul `miniserv` rula deja ca root pe server).
 
+---
+
+## 16. Fuzzing Web și Descoperirea de Directoare cu `ffuf`
+
+În faza de enumerare web, utilitarul `ffuf` (**Fast Fuzzing**) este un instrument rapid și puternic scris în Go, folosit pentru descoperirea de directoare ascunse, fișiere, subdomenii sau parametri prin intermediul unui atac de tip dicționar (fuzzing).
+
+---
+
+### 🚀 Comenzi Esențiale `ffuf`
+
+* **Căutarea de directoare de bază (Directory Fuzzing):**
+  ```bash
+  ffuf -u http://<IP_TINTA>/FUZZ -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+  ```
+  *   `-u`: Specifică URL-ul țintă. Cuvântul cheie `FUZZ` acționează ca un placeholder pe care `ffuf` va testa fiecare cuvânt din dicționar.
+  *   `-w`: Specifică calea către dicționarul (wordlist) utilizat.
+
+* **Filtrarea după codul de status HTTP (Match / Filter):**
+  Dacă vrei să afișezi doar răspunsurile valide (de exemplu, codul 200 OK sau 301 Redirect) și să ascunzi paginile inexistente (404 Not Found):
+  ```bash
+  ffuf -u http://<IP_TINTA>/FUZZ -w <wordlist> -mc 200,301,302,403
+  ```
+  *   `-mc`: Match Code – filtrează rezultatele care întorc doar codurile specificate.
+
+* **Ascunderea dimensiunilor inutile (Filter by Size):**
+  Dacă serverul întoarce o pagină de 404 personalizată care are mereu aceeași dimensiune în bytes (de ex: 4238 bytes) și îți umple ecranul cu rezultate false:
+  ```bash
+  ffuf -u http://<IP_TINTA>/FUZZ -w <wordlist> -fs 4238
+  ```
+  *   `-fs`: Filter Size – ascunde răspunsurile care au exact acea dimensiune.
+
+* **Căutarea de fișiere cu extensii specifice:**
+  Dacă vrei să cauți fișiere de tip `.php`, `.txt` sau `.html` adăugând extensii la cuvintele din dicționar:
+  ```bash
+  ffuf -u http://<IP_TINTA>/FUZZ -w <wordlist> -e .php,.txt,.html
+  ```
+  *   `-e`: Adaugă extensii automate pentru fiecare element testat.
+
+* **Fuzzing de Virtual Hosts (VHost Fuzzing):**
+  Dacă vrei să descoperi subdomenii sau vhost-uri ascunse pe același server web modificând antetul `Host`:
+  ```bash
+  ffuf -u http://<IP_TINTA>/ -H "Host: FUZZ.<nume_domeniu>" -w <wordlist> -fs <dimensiune_default>
+  ```
+  *   `-H`: Permite injectarea sau modificarea unui antet HTTP personalizat, folosind tot cuvântul cheie `FUZZ`.
+
+---
+
+### 📊 Opțiuni Frecvente `ffuf`
+
+| Opțiune | Descriere |
+| :--- | :--- |
+| `-FUZZ` | Cuvântul cheie unde se va face înlocuirea din dicționar. |
+| `-w` | Calea către fișierul cu lista de cuvinte. |
+| `-mc` | Filtrează după coduri HTTP specifice (implicit: 200, 204, 301, 302, 307, 401, 403, 405). |
+| `-fc` | Exclude codurile HTTP specificate (ex: `-fc 404`). |
+| `-fs` | Ascunde răspunsurile cu o dimensiune exactă în bytes. |
+| `-H` | Adaugă un header HTTP personalizat (ex: pentru cookies sau VHost). |
+| `-t` | Numărul de fire de execuție simultane (thread-uri, implicit 40). |
 
 
